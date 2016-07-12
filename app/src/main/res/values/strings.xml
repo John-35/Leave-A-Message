@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">OSM_Test</string>
+    <string name="display_map">Afficher la Carte</string>
+    <string name="display_3dview">Afficher Vue 3D</string>
+    <string name="title">Leave A Message</string>
+    <string name="envoyer">Envoyer</string>
+    <string name="votre_message">Votre Message :</string>
+</resources>
