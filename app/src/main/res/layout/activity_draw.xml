@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.externe.leave_a_message.activities.DrawActivity">
+    tools:context="fr.jonathanperrinet.leave_a_message.activities.DrawActivity">
 
     <TextView
         android:id="@+id/txtview_msg"

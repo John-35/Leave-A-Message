@@ -1,4 +1,4 @@
-package com.example.externe.leave_a_message;
+package fr.jonathanperrinet.leave_a_message.leave_a_message;
 
 import org.junit.Test;
 

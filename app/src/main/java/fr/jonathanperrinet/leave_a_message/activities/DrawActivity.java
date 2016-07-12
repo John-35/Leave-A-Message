@@ -1,4 +1,4 @@
-package com.example.externe.leave_a_message.activities;
+package fr.jonathanperrinet.leave_a_message.activities;
 
 import android.content.Intent;
 import android.location.Location;
@@ -9,8 +9,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.externe.leave_a_message.R;
-import com.example.externe.leave_a_message.utils.App_Const;
+import fr.jonathanperrinet.leave_a_message.utils.App_Const;
+
+import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.AsyncHttpPost;
 import com.koushikdutta.async.http.AsyncHttpResponse;

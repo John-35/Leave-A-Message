@@ -1,4 +1,4 @@
-package com.example.externe.leave_a_message.utils;
+package fr.jonathanperrinet.leave_a_message.utils;
 
 /**
  * Created by Externe on 01/07/2016.

@@ -1,4 +1,4 @@
-package com.example.externe.leave_a_message.activities;
+package fr.jonathanperrinet.leave_a_message.activities;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -13,9 +13,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.externe.leave_a_message.R;
-import com.example.externe.leave_a_message.models.MessageString;
-import com.example.externe.leave_a_message.utils.App_Const;
+import fr.jonathanperrinet.leave_a_message.models.MessageString;
+import fr.jonathanperrinet.leave_a_message.utils.App_Const;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
@@ -34,9 +33,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(fr.jonathanperrinet.leave_a_message.R.layout.activity_main);
 
-        TextView tv = (TextView)findViewById(R.id.txtview_title);
+        TextView tv = (TextView)findViewById(fr.jonathanperrinet.leave_a_message.R.id.txtview_title);
         tv.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Polyline.ttf"));
 
         if(Build.VERSION.SDK_INT >= 23) {

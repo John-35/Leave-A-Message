@@ -1,4 +1,4 @@
-package com.example.externe.leave_a_message.models;
+package fr.jonathanperrinet.leave_a_message.models;
 
 import java.util.ArrayList;
 

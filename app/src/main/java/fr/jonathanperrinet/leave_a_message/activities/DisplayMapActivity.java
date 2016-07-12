@@ -1,4 +1,4 @@
-package com.example.externe.leave_a_message.activities;
+package fr.jonathanperrinet.leave_a_message.activities;
 
 import android.Manifest;
 import android.content.Intent;
@@ -12,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.externe.leave_a_message.R;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
@@ -43,7 +42,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map);
+        setContentView(fr.jonathanperrinet.leave_a_message.R.layout.activity_map);
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -56,7 +55,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         if (!enabled) {
         }
 
-        MapView mapView = (MapView) findViewById(R.id.map);
+        MapView mapView = (MapView) findViewById(fr.jonathanperrinet.leave_a_message.R.id.map);
         String[] urls = {TILE_URL};
         ITileSource tileSource = new XYTileSource("stamen", 1, 20, 256, ".png", urls);
         mapView.setTileSource(tileSource);

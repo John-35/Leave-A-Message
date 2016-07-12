@@ -5,7 +5,7 @@ android {
     buildToolsVersion "24.0.0"
 
     defaultConfig {
-        applicationId "com.example.externe.leave_a_message"
+        applicationId "fr.jonathanperrinet.leave_a_message.leave_a_message"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1

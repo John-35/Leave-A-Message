@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.externe.leave_a_message">
+    package="fr.jonathanperrinet.leave_a_message.leave_a_message">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -16,15 +16,15 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.example.externe.leave_a_message.activities.MainActivity">
+        <activity android:name="fr.jonathanperrinet.leave_a_message.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.externe.leave_a_message.activities.DisplayMapActivity" />
-        <activity android:name="com.example.externe.leave_a_message.activities.AugmentedViewActivity" />
+        <activity android:name="fr.jonathanperrinet.leave_a_message.activities.DisplayMapActivity" />
+        <activity android:name="fr.jonathanperrinet.leave_a_message.activities.AugmentedViewActivity" />
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -33,7 +33,7 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name="com.example.externe.leave_a_message.activities.DrawActivity"></activity>
+        <activity android:name="fr.jonathanperrinet.leave_a_message.activities.DrawActivity"></activity>
     </application>
 
 </manifest>
