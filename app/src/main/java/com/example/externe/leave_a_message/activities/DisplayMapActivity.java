@@ -28,6 +28,8 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
     private static final String TAG = "DisplayMapActivity";
 
     public static final String INTENT_LOCATION = "location";
+    public static final String TILE_URL = "http://tile.stamen.com/toner/";  //"http://tile.stamen.com/watercolor/"
+    public static final String GETMESSAGE_URL = "http://jonathanperrinet.fr/experimental/leaveamessage/getmessage";
 
     private final long MIN_TIME = 500; //milliseconds
     private final float MIN_DIST = 1; //meters
@@ -55,15 +57,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         }
 
         MapView mapView = (MapView) findViewById(R.id.map);
-        //mapView.setTileSource(TileSourceFactory.MAPNIK);
-
-
-        /*
-        public XYTileSource(final String aName, final int aZoomMinLevel,
-			final int aZoomMaxLevel, final int aTileSizePixels, final String aImageFilenameEnding,
-			final String[] aBaseUrl)
-         */
-        String[] urls = {"http://tile.stamen.com/toner/"}; //"http://tile.stamen.com/watercolor/"
+        String[] urls = {TILE_URL};
         ITileSource tileSource = new XYTileSource("stamen", 1, 20, 256, ".png", urls);
         mapView.setTileSource(tileSource);
 
@@ -84,7 +78,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         Toast.makeText(this, "Download", Toast.LENGTH_SHORT).show();
         String url = "";
         Ion.with(this)
-        .load("http://jonathanperrinet.fr/experimental/leaveamessage/getmessage")
+        .load(GETMESSAGE_URL)
         .setMultipartParameter("lat", String.valueOf(mLocation.getLatitude()))
         .setMultipartParameter("lng", String.valueOf(mLocation.getLongitude()))
         .asString()

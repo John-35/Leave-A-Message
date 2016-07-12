@@ -113,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
                 .setCallback(new FutureCallback<com.google.gson.JsonArray>() {
                     @Override
                     public void onCompleted(Exception e, com.google.gson.JsonArray jsonArray) {
-                        //Toast.makeText(MainActivity.this, "Result JSON: " + jsonArray, Toast.LENGTH_LONG).show();
                         ArrayList<MessageString> listMsg = new ArrayList<>();
                         Iterator<JsonElement> iterator = jsonArray.iterator();
                         JsonObject jsonObject;
