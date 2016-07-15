@@ -9,18 +9,30 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
 import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.async.parser.JSONArrayParser;
 import com.koushikdutta.ion.Ion;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
+import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
+import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
+
+import java.util.ArrayList;
+
+import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
 
 public class DisplayMapActivity extends AppCompatActivity implements LocationListener {
 
@@ -39,10 +51,13 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
 
     private Location mLocation = null;
 
+    ArrayList<OverlayItem> items;
+    ItemizedOverlayWithFocus<OverlayItem> mItemOverlay;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(fr.jonathanperrinet.leave_a_message.R.layout.activity_map);
+        setContentView(R.layout.activity_map);
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -55,7 +70,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         if (!enabled) {
         }
 
-        MapView mapView = (MapView) findViewById(fr.jonathanperrinet.leave_a_message.R.id.map);
+        MapView mapView = (MapView) findViewById(R.id.map);
         String[] urls = {TILE_URL};
         ITileSource tileSource = new XYTileSource("stamen", 1, 20, 256, ".png", urls);
         mapView.setTileSource(tileSource);
@@ -71,6 +86,29 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         mapView.setMultiTouchControls(true);
         mapView.getOverlays().add(mRotationGestureOverlay);
 
+        items = new ArrayList<>();
+        mItemOverlay = new ItemizedOverlayWithFocus<OverlayItem>(items, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+            @Override
+            public boolean onItemSingleTapUp(int index, OverlayItem item) {
+                Toast.makeText(DisplayMapActivity.this, item.getTitle(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            @Override
+            public boolean onItemLongPress(int index, OverlayItem item) {
+                Toast.makeText(DisplayMapActivity.this, "onItemLongPress", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        }, getApplicationContext());
+        mapView.getOverlays().add(mItemOverlay);
+
+        mapView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                downloadMessages();
+                return false;
+            }
+        });
     }
 
     private void downloadMessages() {
@@ -85,6 +123,16 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
             @Override
             public void onCompleted(Exception e, String s) {
                 Toast.makeText(DisplayMapActivity.this, "Result: " + s, Toast.LENGTH_SHORT).show();
+                try {
+                    JSONArray json = new JSONArray(s);
+                    for(int i = 0 ; i < json.length() ; i++) {
+                        JSONObject obj = json.getJSONObject(i);
+
+                        //mItemOverlay.addItem(new OverlayItem("Test", "SampleDescription", position));
+                    }
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
     }

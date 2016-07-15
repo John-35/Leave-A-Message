@@ -3,7 +3,7 @@ package fr.jonathanperrinet.leave_a_message.models;
 /**
  * Created by Externe on 01/07/2016.
  */
-public class Message {
+public abstract class Message {
 
     private double latitude, longitude;
 
@@ -36,4 +36,6 @@ public class Message {
     public float getRotZ() {
         return rotZ;
     }
+
+    abstract public void display();
 }

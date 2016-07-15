@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/LeaveAMessage.iml" filepath="$PROJECT_DIR$/LeaveAMessage.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Leave-A-Message.iml" filepath="$PROJECT_DIR$/Leave-A-Message.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

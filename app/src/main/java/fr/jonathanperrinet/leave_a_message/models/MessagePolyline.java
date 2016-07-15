@@ -15,4 +15,9 @@ public class MessagePolyline extends Message {
     public Polyline getPolyline() {
         return polyline;
     }
+
+    @Override
+    public void display() {
+
+    }
 }

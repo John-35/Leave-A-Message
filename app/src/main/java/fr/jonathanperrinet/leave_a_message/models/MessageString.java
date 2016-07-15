@@ -15,4 +15,9 @@ public class MessageString extends Message {
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public void display() {
+
+    }
 }

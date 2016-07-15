@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
 import fr.jonathanperrinet.leave_a_message.models.MessageString;
 import fr.jonathanperrinet.leave_a_message.utils.App_Const;
 import com.google.gson.JsonElement;
@@ -33,9 +34,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(fr.jonathanperrinet.leave_a_message.R.layout.activity_main);
+        setContentView(R.layout.activity_main);
 
-        TextView tv = (TextView)findViewById(fr.jonathanperrinet.leave_a_message.R.id.txtview_title);
+        TextView tv = (TextView)findViewById(R.id.txtview_title);
         tv.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Polyline.ttf"));
 
         if(Build.VERSION.SDK_INT >= 23) {
