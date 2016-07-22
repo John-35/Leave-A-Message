@@ -44,12 +44,8 @@ public class DrawActivity extends AppCompatActivity {
             AsyncHttpPost post = new AsyncHttpPost(App_Const.URL_UPLOAD);
             MultipartFormDataBody body = new MultipartFormDataBody();
 
-            String message = "<msg lat='" + mLocation.getLatitude() + "' lng='" + mLocation.getLongitude() + "'>";
-            /*for (int i = 0; i < 20; i++) {
-                message += "<pt x='10' y='100' z='1000'/>";
-            }*/
-            message += ((EditText)findViewById(R.id.edittxt_msg)).getText().toString();
-            message += "</msg>";
+            //String message = "{ lat='" + mLocation.getLatitude() + "' lng='" + mLocation.getLongitude() + "'>";
+            String message = "{" + ((EditText)findViewById(R.id.edittxt_msg)).getText().toString() + "}";
             body.addStringPart("msg", message);
             body.addStringPart("lat", String.valueOf(mLocation.getLatitude()));
             body.addStringPart("lng", String.valueOf(mLocation.getLongitude()));

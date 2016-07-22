@@ -104,27 +104,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickBtnTest(View view) {
-        Ion.with(this)
-                .load(App_Const.URL_GETMESSAGE)
-                .setMultipartParameter("lat", String.valueOf(48.107175536209155))
-                .setMultipartParameter("lng", String.valueOf(-1.693147445715343))
-                .setMultipartParameter("dist", String.valueOf(1))
-                .asJsonArray()
-                .setCallback(new FutureCallback<com.google.gson.JsonArray>() {
-                    @Override
-                    public void onCompleted(Exception e, com.google.gson.JsonArray jsonArray) {
-                        ArrayList<MessageString> listMsg = new ArrayList<>();
-                        Iterator<JsonElement> iterator = jsonArray.iterator();
-                        JsonObject jsonObject;
-                        while(iterator.hasNext()) {
-                            jsonObject = iterator.next().getAsJsonObject();
-                            double latitude = jsonObject.get("lat").getAsDouble();
-                            double longitude = jsonObject.get("lng").getAsDouble();
-                            String url = jsonObject.get("url").getAsString();
-                            Toast.makeText(MainActivity.this, "Url: " + url, Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
 
     }
 }

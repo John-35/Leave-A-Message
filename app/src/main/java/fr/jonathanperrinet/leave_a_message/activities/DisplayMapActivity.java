@@ -7,19 +7,19 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.async.parser.JSONArrayParser;
 import com.koushikdutta.ion.Ion;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
@@ -31,8 +31,13 @@ import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
+import fr.jonathanperrinet.leave_a_message.models.Message;
+import fr.jonathanperrinet.leave_a_message.models.MessageString;
+import fr.jonathanperrinet.leave_a_message.utils.App_Const;
 
 public class DisplayMapActivity extends AppCompatActivity implements LocationListener {
 
@@ -40,7 +45,6 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
 
     public static final String INTENT_LOCATION = "location";
     public static final String TILE_URL = "http://tile.stamen.com/toner/";  //"http://tile.stamen.com/watercolor/"
-    public static final String GETMESSAGE_URL = "http://jonathanperrinet.fr/experimental/leaveamessage/getmessage";
 
     private final long MIN_TIME = 500; //milliseconds
     private final float MIN_DIST = 1; //meters
@@ -54,10 +58,16 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
     ArrayList<OverlayItem> items;
     ItemizedOverlayWithFocus<OverlayItem> mItemOverlay;
 
+    HashMap<String, Message> messages = new HashMap<>();
+
+    boolean firstTime = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -68,12 +78,17 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
 
         boolean enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         if (!enabled) {
+            //TODO: gestion position indisponible
         }
 
         MapView mapView = (MapView) findViewById(R.id.map);
         String[] urls = {TILE_URL};
         ITileSource tileSource = new XYTileSource("stamen", 1, 20, 256, ".png", urls);
-        mapView.setTileSource(tileSource);
+        try {
+            mapView.setTileSource(tileSource);
+        } catch(NullPointerException e) {
+            Log.e(TAG, e.getMessage());
+        }
 
 
         mapController = mapView.getController();
@@ -87,7 +102,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         mapView.getOverlays().add(mRotationGestureOverlay);
 
         items = new ArrayList<>();
-        mItemOverlay = new ItemizedOverlayWithFocus<OverlayItem>(items, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+        mItemOverlay = new ItemizedOverlayWithFocus<>(items, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
             @Override
             public boolean onItemSingleTapUp(int index, OverlayItem item) {
                 Toast.makeText(DisplayMapActivity.this, item.getTitle(), Toast.LENGTH_SHORT).show();
@@ -112,38 +127,60 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
     }
 
     private void downloadMessages() {
-        Toast.makeText(this, "Download", Toast.LENGTH_SHORT).show();
-        String url = "";
+        //Toast.makeText(this, "Download", Toast.LENGTH_SHORT).show();
         Ion.with(this)
-        .load(GETMESSAGE_URL)
-        .setMultipartParameter("lat", String.valueOf(mLocation.getLatitude()))
-        .setMultipartParameter("lng", String.valueOf(mLocation.getLongitude()))
-        .asString()
-        .setCallback(new FutureCallback<String>() {
-            @Override
-            public void onCompleted(Exception e, String s) {
-                Toast.makeText(DisplayMapActivity.this, "Result: " + s, Toast.LENGTH_SHORT).show();
-                try {
-                    JSONArray json = new JSONArray(s);
-                    for(int i = 0 ; i < json.length() ; i++) {
-                        JSONObject obj = json.getJSONObject(i);
-
-                        //mItemOverlay.addItem(new OverlayItem("Test", "SampleDescription", position));
+                .load(App_Const.URL_LIST)
+                .setMultipartParameter("lat", String.valueOf(48.107175536209155))
+                .setMultipartParameter("lng", String.valueOf(-1.693147445715343))
+                .setMultipartParameter("dist", String.valueOf(10))
+                .asJsonArray()
+                .setCallback(new FutureCallback<com.google.gson.JsonArray>() {
+                    @Override
+                    public void onCompleted(Exception e, com.google.gson.JsonArray jsonArray) {
+                        Log.d(TAG, "jsonArray: " + jsonArray);
+                        Iterator<JsonElement> iterator = jsonArray.iterator();
+                        JsonObject jsonObject;
+                        /*while(iterator.hasNext()) {
+                            jsonObject = iterator.next().getAsJsonObject();
+                            Log.d(TAG, "jsonObject: " + jsonObject);
+                            double latitude = jsonObject.get("lat").getAsDouble();
+                            double longitude = jsonObject.get("lng").getAsDouble();
+                            String url = jsonObject.get("url").getAsString();
+                            if(!messages.containsKey(url)) {
+                                messages.put(url, new MessageString(latitude, longitude, 0, 0, 0, url));
+                                mItemOverlay.addItem(new OverlayItem(url, "SampleDescription", new GeoPoint(latitude, longitude)));
+                                openMessageFromServer(url);
+                            }
+                        }*/
                     }
-                } catch (JSONException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        });
+                });
+    }
+
+    private void openMessageFromServer(String url) {
+        Toast.makeText(DisplayMapActivity.this, "Opening: " + url, Toast.LENGTH_SHORT).show();
+        Ion.with(this)
+                .load(App_Const.URL_GET_MESSAGE)
+                .setBodyParameter("url", url)
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject jsonObj) {
+                        Toast.makeText(DisplayMapActivity.this, "Content: " + jsonObj.getAsString(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     @Override
     public void onLocationChanged(Location location) {
         GeoPoint position = new GeoPoint(location.getLatitude(), location.getLongitude());
-        mapController.setCenter(position);
+        if(firstTime) {
+            mapController.setCenter(position);
+            firstTime = false;
+        }
 
         mLocation = location;
 
+        Ion.getDefault(this).cancelAll();
         downloadMessages();
     }
 
