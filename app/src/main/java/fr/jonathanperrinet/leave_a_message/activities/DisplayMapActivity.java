@@ -56,7 +56,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
     private Location mLocation = null;
 
     ArrayList<OverlayItem> items;
-    ItemizedOverlayWithFocus<OverlayItem> mItemOverlay;
+    ItemizedIconOverlay<OverlayItem> mItemOverlay;
 
     HashMap<String, Message> messages = new HashMap<>();
 
@@ -81,15 +81,10 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
             //TODO: gestion position indisponible
         }
 
-        MapView mapView = (MapView) findViewById(R.id.map);
+        final MapView mapView = (MapView) findViewById(R.id.map);
         String[] urls = {TILE_URL};
-        ITileSource tileSource = new XYTileSource("stamen", 1, 20, 256, ".png", urls);
-        try {
-            mapView.setTileSource(tileSource);
-        } catch(NullPointerException e) {
-            Log.e(TAG, e.getMessage());
-        }
-
+        final ITileSource tileSource = new XYTileSource("stamen", 1, 20, 256, ".png", urls);
+        mapView.setTileSource(tileSource);
 
         mapController = mapView.getController();
         mapController.setZoom(30);
@@ -102,63 +97,61 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         mapView.getOverlays().add(mRotationGestureOverlay);
 
         items = new ArrayList<>();
-        mItemOverlay = new ItemizedOverlayWithFocus<>(items, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+        mItemOverlay = new ItemizedIconOverlay<>(items, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
             @Override
             public boolean onItemSingleTapUp(int index, OverlayItem item) {
                 Toast.makeText(DisplayMapActivity.this, item.getTitle(), Toast.LENGTH_SHORT).show();
-                return true;
+                return false;
             }
 
             @Override
             public boolean onItemLongPress(int index, OverlayItem item) {
                 Toast.makeText(DisplayMapActivity.this, "onItemLongPress", Toast.LENGTH_SHORT).show();
-                return true;
+                return false;
             }
         }, getApplicationContext());
         mapView.getOverlays().add(mItemOverlay);
-
-        mapView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                downloadMessages();
-                return false;
-            }
-        });
     }
 
-    private void downloadMessages() {
-        //Toast.makeText(this, "Download", Toast.LENGTH_SHORT).show();
+    private void downloadMessages(Location location) {
+        Toast.makeText(this, "Download around " + location.getLatitude() + " ; " + location.getLongitude(), Toast.LENGTH_SHORT).show();
         Ion.with(this)
                 .load(App_Const.URL_LIST)
-                .setMultipartParameter("lat", String.valueOf(48.107175536209155))
-                .setMultipartParameter("lng", String.valueOf(-1.693147445715343))
-                .setMultipartParameter("dist", String.valueOf(10))
+                //.setMultipartParameter("lat", String.valueOf(48.107175536209155))
+                //.setMultipartParameter("lng", String.valueOf(-1.693147445715343))
+                .setMultipartParameter("lat", String.valueOf(location.getLatitude()))
+                .setMultipartParameter("lng", String.valueOf(location.getLongitude()))
+                .setMultipartParameter("dist", String.valueOf(1000))
                 .asJsonArray()
                 .setCallback(new FutureCallback<com.google.gson.JsonArray>() {
                     @Override
                     public void onCompleted(Exception e, com.google.gson.JsonArray jsonArray) {
                         Log.d(TAG, "jsonArray: " + jsonArray);
-                        Iterator<JsonElement> iterator = jsonArray.iterator();
-                        JsonObject jsonObject;
-                        /*while(iterator.hasNext()) {
-                            jsonObject = iterator.next().getAsJsonObject();
-                            Log.d(TAG, "jsonObject: " + jsonObject);
-                            double latitude = jsonObject.get("lat").getAsDouble();
-                            double longitude = jsonObject.get("lng").getAsDouble();
-                            String url = jsonObject.get("url").getAsString();
-                            if(!messages.containsKey(url)) {
-                                messages.put(url, new MessageString(latitude, longitude, 0, 0, 0, url));
-                                mItemOverlay.addItem(new OverlayItem(url, "SampleDescription", new GeoPoint(latitude, longitude)));
-                                openMessageFromServer(url);
+                        Toast.makeText(DisplayMapActivity.this, "jsonArray: " + jsonArray, Toast.LENGTH_SHORT).show();
+                        if(jsonArray != null) {
+                            Iterator<JsonElement> iterator = jsonArray.iterator();
+                            JsonObject jsonObject;
+                            Toast.makeText(DisplayMapActivity.this, "iterator: " + iterator, Toast.LENGTH_SHORT).show();
+                            while(iterator.hasNext()) {
+                                jsonObject = iterator.next().getAsJsonObject();
+                                Log.d(TAG, "jsonObject: " + jsonObject);
+                                double latitude = jsonObject.get("lat").getAsDouble();
+                                double longitude = jsonObject.get("lng").getAsDouble();
+                                String url = jsonObject.get("url").getAsString();
+                                if(!messages.containsKey(url)) {
+                                    messages.put(url, new MessageString(latitude, longitude, 0, 0, 0, url));
+                                    mItemOverlay.addItem(new OverlayItem(url, "SampleDescription", new GeoPoint(latitude, longitude)));
+                                    openMessageFromServer(url);
+                                }
                             }
-                        }*/
+                        }
                     }
                 });
     }
 
     private void openMessageFromServer(String url) {
         Toast.makeText(DisplayMapActivity.this, "Opening: " + url, Toast.LENGTH_SHORT).show();
-        Ion.with(this)
+        /*Ion.with(this)
                 .load(App_Const.URL_GET_MESSAGE)
                 .setBodyParameter("url", url)
                 .asJsonObject()
@@ -167,7 +160,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
                     public void onCompleted(Exception e, JsonObject jsonObj) {
                         Toast.makeText(DisplayMapActivity.this, "Content: " + jsonObj.getAsString(), Toast.LENGTH_SHORT).show();
                     }
-                });
+                });*/
     }
 
     @Override
@@ -180,8 +173,8 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
 
         mLocation = location;
 
-        Ion.getDefault(this).cancelAll();
-        downloadMessages();
+        //Ion.getDefault(this).cancelAll();
+        downloadMessages(location);
     }
 
     @Override
@@ -191,13 +184,13 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
 
     @Override
     public void onProviderEnabled(String provider) {
-        Toast.makeText(this, "Enabled new provider " + provider, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Enabled new provider " + provider, Toast.LENGTH_SHORT).show();
 
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        Toast.makeText(this, "Disabled provider " + provider, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Disabled provider " + provider, Toast.LENGTH_SHORT).show();
     }
 
     public void onClickFabBtn(View view) {
