@@ -16,6 +16,10 @@ public class MessageString extends Message {
         return message;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     @Override
     public void display() {
 

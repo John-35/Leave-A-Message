@@ -9,5 +9,5 @@ public class App_Const {
 
     public static final String URL_UPLOAD = "http://jonathanperrinet.fr/experimental/leaveamessage/upload";
 
-    public static final String URL_GET_MESSAGE= "http://jonathanperrinet.fr/experimental/leaveamessage/getMessage";
+    public static final String URL_GET_MESSAGE= "http://jonathanperrinet.fr/experimental/leaveamessage/getmessage";
 }

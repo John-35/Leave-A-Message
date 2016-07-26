@@ -22,4 +22,14 @@
         android:layout_margin="@dimen/activity_horizontal_margin"
         android:onClick="onClickFabBtn"/>
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabCenterPosition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_mylocation"
+        android:elevation="6dp"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:onClick="onClickCenterPosition"/>
+
 </android.support.design.widget.CoordinatorLayout>
