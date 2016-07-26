@@ -9,12 +9,18 @@ public abstract class Message {
 
     private float rotX, rotY, rotZ;
 
-    public Message(double latitude, double longitude, float rotX, float rotY, float rotZ) {
+    private boolean loaded;
+
+    private String url;
+
+    public Message(String url, double latitude, double longitude, float rotX, float rotY, float rotZ) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.rotX = rotX;
         this.rotY = rotY;
         this.rotZ = rotZ;
+        this.url = url;
+        loaded = false;
     }
 
     public double getLatitude() {
@@ -38,4 +44,20 @@ public abstract class Message {
     }
 
     abstract public void display();
+
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    public void setLoaded(boolean loaded) {
+        this.loaded = loaded;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 }

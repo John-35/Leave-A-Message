@@ -7,8 +7,8 @@ public class MessagePolyline extends Message {
 
     private Polyline polyline;
 
-    public MessagePolyline(double latitude, double longitude, float rotX, float rotY, float rotZ, Polyline polyline) {
-        super(latitude, longitude, rotX, rotY, rotZ);
+    public MessagePolyline(String url, double latitude, double longitude, float rotX, float rotY, float rotZ, Polyline polyline) {
+        super(url, latitude, longitude, rotX, rotY, rotZ);
         this.polyline = polyline;
     }
 

@@ -83,6 +83,15 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
         setContentView(R.layout.activity_map);
 
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
@@ -153,20 +162,26 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         runUpdateItemPresence = new Runnable() {
             @Override
             public void run() {
-                GeoPoint itemGeoPoint;
-                Iterator<OverlayItem> it = items.iterator();
-                while(it.hasNext()) {
-                    OverlayItem item = it.next();
-                    itemGeoPoint = (GeoPoint)item.getPoint();
-                    int distance = mGeoPointLocation.distanceTo(itemGeoPoint);
-                    if(distance > MAX_VIEWFIELD) {
-                        messages.remove(item.getTitle());
-                        it.remove();
-                        mItemOverlay.removeItem(item);
+                if(mGeoPointLocation != null) {
+                    GeoPoint itemGeoPoint;
+                    Iterator<OverlayItem> it = items.iterator();
+                    while (it.hasNext()) {
+                        OverlayItem item = it.next();
+                        itemGeoPoint = (GeoPoint) item.getPoint();
+                        int distance = mGeoPointLocation.distanceTo(itemGeoPoint);
+                        if (distance > MAX_VIEWFIELD) {
+                            messages.remove(item.getTitle());
+                            it.remove();
+                            mItemOverlay.removeItem(item);
+                        } else {
+                            if (!messages.get(item.getTitle()).isLoaded()) {
+                                openMessageFromServer(messages.get(item.getTitle()));
+                            }
+                        }
                     }
+                    mapView.invalidate(); //update the mapview display
+                    downloadMessages(mGeoPointLocation);
                 }
-                mapView.invalidate(); //update the mapview display
-                downloadMessages(mGeoPointLocation);
                 handlerUpdate.postDelayed(this, REFRESH_TIME);
             }
         };
@@ -194,10 +209,10 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
                                 double longitude = jsonObject.get("lng").getAsDouble();
                                 String url = jsonObject.get("url").getAsString();
                                 if(!messages.containsKey(url)) {
-                                    Message msg = new MessageString(latitude, longitude, 0, 0, 0, url);
+                                    Message msg = new MessageString(url, latitude, longitude, 0, 0, 0, null);
                                     messages.put(url, msg);
                                     mItemOverlay.addItem(new OverlayItem(url, "SampleDescription", new GeoPoint(latitude, longitude)));
-                                    openMessageFromServer(url, msg);
+                                    openMessageFromServer(msg);
                                 }
                             }
                         }
@@ -206,7 +221,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
                 });
     }
 
-    private void openMessageFromServer(final String url, final Message msg) {
+    private void openMessageFromServer(final Message msg) {
         /*Ion.with(this)
                 .load(App_Const.URL_GET_MESSAGE)
                 .setBodyParameter("url", url)
@@ -224,7 +239,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
 
         Ion.with(this)
                 .load(App_Const.URL_GET_MESSAGE)
-                .setMultipartParameter("url", url)
+                .setMultipartParameter("url", msg.getUrl())
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     @Override
@@ -243,6 +258,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
                         }*/
                         if(json != null) {
                             ((MessageString) msg).setMessage(json);
+                            msg.setLoaded(true);
                         } else {
                             ((MessageString) msg).setMessage(getResources().getString(R.string.erreur_loading_message));
                         }
@@ -259,9 +275,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         }
 
         mGeoPointLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
-
         locationOverlay.setLocation(mGeoPointLocation);
-
         downloadMessages(mGeoPointLocation);
     }
 
@@ -316,11 +330,13 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         super.onPause();
 
         //Load last position known
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putFloat(SHARED_PREF_LAT, (float)mGeoPointLocation.getLatitude());
-        editor.putFloat(SHARED_PREF_LON, (float)mGeoPointLocation.getLongitude());
-        editor.commit();
+        if(mGeoPointLocation != null) {
+            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putFloat(SHARED_PREF_LAT, (float) mGeoPointLocation.getLatitude());
+            editor.putFloat(SHARED_PREF_LON, (float) mGeoPointLocation.getLongitude());
+            editor.commit();
+        }
 
         handlerUpdate.removeCallbacks(runUpdateItemPresence);
 
@@ -332,7 +348,11 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
     }
 
     public void onClickCenterPosition(View view) {
-        Toast.makeText(this, "Your are at position : " + mGeoPointLocation, Toast.LENGTH_SHORT).show();
-        mapController.animateTo(mGeoPointLocation);
+        if(mGeoPointLocation != null) {
+            Toast.makeText(this, "Your are at position : " + mGeoPointLocation, Toast.LENGTH_SHORT).show();
+            mapController.animateTo(mGeoPointLocation);
+        } else {
+            Toast.makeText(this, "Unknown position", Toast.LENGTH_SHORT).show();
+        }
     }
 }

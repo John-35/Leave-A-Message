@@ -7,8 +7,8 @@ public class MessageString extends Message {
 
     private String message;
 
-    public MessageString(double latitude, double longitude, float rotX, float rotY, float rotZ, String message) {
-        super(latitude, longitude, rotX, rotY, rotZ);
+    public MessageString(String url, double latitude, double longitude, float rotX, float rotY, float rotZ, String message) {
+        super(url, latitude, longitude, rotX, rotY, rotZ);
         this.message = message;
     }
 
