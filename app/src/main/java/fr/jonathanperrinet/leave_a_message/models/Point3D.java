@@ -1,7 +1,7 @@
 package fr.jonathanperrinet.leave_a_message.models;
 
 /**
- * Created by Externe on 28/06/2016.
+ * Created by Jonathan Perrinet on 01/07/2016.
  */
 public class Point3D {
 

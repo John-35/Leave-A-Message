@@ -3,7 +3,7 @@ package fr.jonathanperrinet.leave_a_message.models;
 import java.util.ArrayList;
 
 /**
- * Created by Externe on 28/06/2016.
+ * Created by Jonathan Perrinet on 01/07/2016.
  */
 public class Polyline {
 

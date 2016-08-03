@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.github.gcacace.signaturepad.views.SignaturePad;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.AsyncHttpPost;
 import com.koushikdutta.async.http.AsyncHttpResponse;
@@ -17,12 +18,17 @@ import com.koushikdutta.async.http.callback.HttpConnectCallback;
 import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
 import fr.jonathanperrinet.leave_a_message.utils.App_Const;
 
+/**
+ * Created by Jonathan Perrinet.
+ */
 public class DrawActivity extends AppCompatActivity {
 
     private static final String TAG = "DrawActivity";
 
     private double latitude;
     private double longitude;
+
+    private SignaturePad pad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +43,28 @@ public class DrawActivity extends AppCompatActivity {
             Toast.makeText(this, "Erreur lors de la récupération de la position", Toast.LENGTH_LONG).show();
             finish();
         }
+
+        pad = (SignaturePad)findViewById(R.id.pad);
+        pad.setOnSignedListener(new SignaturePad.OnSignedListener() {
+            @Override
+            public void onStartSigning() {
+
+            }
+
+            @Override
+            public void onSigned() {
+                Log.d(TAG, pad.getSignatureSvg());
+            }
+
+            @Override
+            public void onClear() {
+
+            }
+        });
     }
 
     public void onClickBtnSend(View view) {
-        AsyncHttpPost post = new AsyncHttpPost(App_Const.URL_UPLOAD);
+        /*AsyncHttpPost post = new AsyncHttpPost(App_Const.URL_UPLOAD);
         MultipartFormDataBody body = new MultipartFormDataBody();
 
         //String message = "{ lat='" + mLocation.getLatitude() + "' lng='" + mLocation.getLongitude() + "'>";
@@ -59,7 +83,7 @@ public class DrawActivity extends AppCompatActivity {
         });
 
         Toast.makeText(this, "Message envoyé", Toast.LENGTH_SHORT).show();
-
+        */
         finish();
     }
 }

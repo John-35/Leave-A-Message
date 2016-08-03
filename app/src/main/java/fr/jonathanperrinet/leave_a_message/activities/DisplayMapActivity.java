@@ -41,6 +41,9 @@ import fr.jonathanperrinet.leave_a_message.models.Message;
 import fr.jonathanperrinet.leave_a_message.models.MessageString;
 import fr.jonathanperrinet.leave_a_message.utils.App_Const;
 
+/**
+ * Created by Jonathan Perrinet.
+ */
 public class DisplayMapActivity extends AppCompatActivity implements LocationListener {
 
     private static final String TAG = "DisplayMapActivity";
