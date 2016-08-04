@@ -3,25 +3,22 @@ package fr.jonathanperrinet.leave_a_message.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.github.gcacace.signaturepad.views.SignaturePad;
-import com.koushikdutta.async.http.AsyncHttpClient;
-import com.koushikdutta.async.http.AsyncHttpPost;
-import com.koushikdutta.async.http.AsyncHttpResponse;
-import com.koushikdutta.async.http.body.MultipartFormDataBody;
-import com.koushikdutta.async.http.callback.HttpConnectCallback;
+
+import java.util.ArrayList;
 
 import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
-import fr.jonathanperrinet.leave_a_message.utils.App_Const;
+import fr.jonathanperrinet.leave_a_message.model.BezierCurve;
 
 /**
  * Created by Jonathan Perrinet.
  */
 public class DrawActivity extends AppCompatActivity {
+
+    public static final int REQUEST_CODE = 1;
 
     private static final String TAG = "DrawActivity";
 
@@ -53,7 +50,7 @@ public class DrawActivity extends AppCompatActivity {
 
             @Override
             public void onSigned() {
-                Log.d(TAG, pad.getSignatureSvg());
+
             }
 
             @Override
@@ -84,6 +81,25 @@ public class DrawActivity extends AppCompatActivity {
 
         Toast.makeText(this, "Message envoyé", Toast.LENGTH_SHORT).show();
         */
-        finish();
+        //finish();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == REQUEST_CODE) {
+            if(resultCode == RESULT_OK) {
+                Toast.makeText(this, "Result", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    public void onClickBtnPositionMsg(View view) {
+        Intent intent = new Intent(DrawActivity.this, AugmentedViewActivity.class);
+        intent.putExtra("svg", pad.getSignatureSvg());
+        ArrayList<BezierCurve> curves = pad.getBeziersCurves();
+        intent.putExtra("curves", curves);
+        //startActivityForResult(intent, REQUEST_CODE);
+        startActivity(intent);
     }
 }

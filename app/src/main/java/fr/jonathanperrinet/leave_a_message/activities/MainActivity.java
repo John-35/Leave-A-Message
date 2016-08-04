@@ -14,16 +14,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
-import fr.jonathanperrinet.leave_a_message.models.MessageString;
-import fr.jonathanperrinet.leave_a_message.utils.App_Const;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -127,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickBtnTest(View view) {
-
+        Intent intent = new Intent(this, DrawActivity.class);
+        startActivity(intent);
     }
 }

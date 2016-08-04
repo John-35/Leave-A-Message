@@ -6,4 +6,5 @@
     <string name="envoyer">Envoyer</string>
     <string name="votre_message">Votre Message :</string>
     <string name="erreur_loading_message">Impossible de charger le message.</string>
+    <string name="placer">Placer</string>
 </resources>

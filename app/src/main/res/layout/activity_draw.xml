@@ -22,8 +22,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:text="@string/envoyer"
-        android:onClick="onClickBtnSend"/>
+        android:text="@string/placer"
+        android:onClick="onClickBtnPositionMsg"/>
 
     <com.github.gcacace.signaturepad.views.SignaturePad
         android:id="@+id/pad"

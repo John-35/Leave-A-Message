@@ -37,8 +37,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
-import fr.jonathanperrinet.leave_a_message.models.Message;
-import fr.jonathanperrinet.leave_a_message.models.MessageString;
+import fr.jonathanperrinet.leave_a_message.model.Message;
+import fr.jonathanperrinet.leave_a_message.model.MessageString;
 import fr.jonathanperrinet.leave_a_message.utils.App_Const;
 
 /**
