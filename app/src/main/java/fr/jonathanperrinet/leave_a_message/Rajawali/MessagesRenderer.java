@@ -6,10 +6,12 @@ import android.view.MotionEvent;
 import android.widget.Toast;
 
 import org.rajawali3d.cameras.Camera;
+import org.rajawali3d.curves.CompoundCurve3D;
 import org.rajawali3d.curves.CubicBezierCurve3D;
 import org.rajawali3d.curves.ICurve3D;
 import org.rajawali3d.lights.DirectionalLight;
 import org.rajawali3d.materials.Material;
+import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.primitives.Line3D;
 import org.rajawali3d.primitives.Sphere;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Stack;
 
 import fr.jonathanperrinet.leave_a_message.model.BezierCurve;
+import fr.jonathanperrinet.leave_a_message.model.ParcelableVector3;
 
 /**
  * Created by Jonathan Perrinet on 02/08/2016.
@@ -33,6 +36,7 @@ public class MessagesRenderer extends RajawaliRenderer {
     double flickStart;
 
     Camera cam;
+    Quaternion quatCameraInit;
 
     double angle = 0;
 
@@ -62,7 +66,7 @@ public class MessagesRenderer extends RajawaliRenderer {
 
         material.setColor(0xffffff);
 
-        Sphere sphere = new Sphere(5, 10, 10);
+        Sphere sphere = new Sphere(20, 10, 10);
         sphere.setMaterial(material);
         getCurrentScene().addChild(sphere);
 
@@ -72,7 +76,9 @@ public class MessagesRenderer extends RajawaliRenderer {
         cam.setZ(200);
         cam.setX(50);
 
-        Log.i(TAG, "Deja ici");
+        quatCameraInit = getCurrentCamera().getOrientation();
+        Log.i(TAG, "Quat ini: " + quatCameraInit);
+
         if(listener != null) {
             //List<String> messages = listener.getMessages();
             //for (String msg : messages) {
@@ -80,7 +86,9 @@ public class MessagesRenderer extends RajawaliRenderer {
             //}
             List<BezierCurve> curves = listener.getCurves();
             Log.i(TAG, "curves: " + curves.size());
-            addBezier(curves);
+            if(curves.size() > 0) {
+                addBezier(curves);
+            }
         }
     }
 
@@ -127,21 +135,28 @@ public class MessagesRenderer extends RajawaliRenderer {
     }*/
 
     private void addBezier(List<BezierCurve> curves) {
-        Log.i(TAG, "size: " + curves.size());
+        final int SCALE = 100;
+
+        CompoundCurve3D compound = new CompoundCurve3D();
+        ParcelableVector3 lastPoint = null;
+
         for(int i = 0 ; i < curves.size() ; i++) {
             BezierCurve curve = curves.get(i);
             Log.i(TAG, "Add curve to scene: " + curve);
-
-            final int SCALE = 100;
-
-            /*drawCurve(new CubicBezierCurve3D(new Vector3(curve.startPoint.x * SCALE, (1 - curve.startPoint.y) * SCALE, curve.startPoint.z),
+            CubicBezierCurve3D cubicBezierCurve = new CubicBezierCurve3D(new Vector3(curve.startPoint.x * SCALE, (1 - curve.startPoint.y) * SCALE, curve.startPoint.z),
                     new Vector3(curve.control1.x * SCALE, (1 - curve.control1.y) * SCALE, curve.control1.z),
                     new Vector3(curve.control2.x * SCALE, (1 - curve.control2.y) * SCALE, curve.control2.z),
-                    new Vector3(curve.endPoint.x * SCALE, (1 - curve.endPoint.y) * SCALE, curve.endPoint.z)));*/
+                    new Vector3(curve.endPoint.x * SCALE, (1 - curve.endPoint.y) * SCALE, curve.endPoint.z));
 
-            drawCurve(new CubicBezierCurve3D(new Vector3(0, 0, 0), new Vector3(0, 0, 0),
-                                             new Vector3(200, 200, 200), new Vector3(200,200,200)));
+            if(lastPoint != null && !curve.startPoint.sameAs(lastPoint)) {
+                drawCurve(compound);
+                compound = new CompoundCurve3D();
+            }
+
+            compound.addCurve(cubicBezierCurve);
+            lastPoint = curve.endPoint;
         }
+        drawCurve(compound);
     }
 
     private void drawCurve(ICurve3D curve) {
@@ -156,7 +171,23 @@ public class MessagesRenderer extends RajawaliRenderer {
         Log.i(TAG, "points: " + points.size());
         Line3D line = new Line3D(points, 10);
         line.setMaterial(material);
-        Log.i(TAG, "mat: " + material);
         getCurrentScene().addChild(line);
     }
+
+    public void updateCameraOrientation(float roll, float pitch, float bearing) {
+        Quaternion quatPitch = new Quaternion(new Vector3(1, 0, 0), Math.toDegrees(pitch));
+        Quaternion quatBearing = new Quaternion(new Vector3(0, 1, 0), Math.toDegrees(bearing));
+        Quaternion quatRoll = new Quaternion(new Vector3(0, 0, 1), Math.toDegrees(roll + Math.PI / 2));
+
+        Quaternion quatRotateWith = quatBearing.multiply(quatRoll.multiply(quatPitch));
+        //getCurrentCamera().setCameraYaw(Math.toDegrees(bearing));
+        //getCurrentCamera().setCameraRoll(Math.toDegrees(roll));
+        //getCurrentCamera().setCameraPitch(Math.toDegrees(pitch));
+
+        if(quatCameraInit != null && quatRotateWith != null) {
+            quatCameraInit.slerp(quatBearing, 0.1);
+            getCurrentCamera().setCameraOrientation(quatRotateWith);
+        }
+    }
+
 }

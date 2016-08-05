@@ -457,7 +457,8 @@ public class SignaturePad extends View {
             BezierCurve bCurve = new BezierCurve(curve.startPoint.x, curve.startPoint.y,
                                                  curve.control1.x, curve.control1.y,
                                                  curve.control2.x, curve.control2.y,
-                                                 curve.endPoint.x, curve.endPoint.y);
+                                                 curve.endPoint.x, curve.endPoint.y,
+                                                 getWidth(), getHeight());
             beziersCurves.add(bCurve);
 
             addBezier(curve, mLastWidth, newWidth);

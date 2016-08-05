@@ -3,32 +3,25 @@ package fr.jonathanperrinet.leave_a_message.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.github.gcacace.signaturepad.utils.TimedPoint;
-
 /**
  * Created by Jonathan Perrinet on 04/08/2016.
  */
 public class BezierCurve implements Parcelable {
-
-    private final static double SCALE = 10;
 
     public ParcelableVector3 startPoint;
     public ParcelableVector3 control1;
     public ParcelableVector3 endPoint;
     public ParcelableVector3 control2;
 
-    public BezierCurve(double sx, double sy, double cx1, double cy1, double cx2, double cy2, double ex, double ey) {
-        this.startPoint = new ParcelableVector3(sx / SCALE, sy / SCALE, 0);
-        this.control1 = new ParcelableVector3(cx1 / SCALE, cy1 / SCALE, 0);
-        this.endPoint = new ParcelableVector3(ex / SCALE, ey / SCALE, 0);
-        this.control2 = new ParcelableVector3(cx2 / SCALE, cy2 / SCALE, 0);
-    }
-
-    public BezierCurve(TimedPoint startPoint, TimedPoint control1, TimedPoint endPoint, TimedPoint control2) {
-        this.startPoint = new ParcelableVector3(startPoint.x / SCALE, startPoint.y / SCALE, 0);
-        this.control1 = new ParcelableVector3(control1.x / SCALE, control1.y / SCALE, 0);
-        this.endPoint = new ParcelableVector3(endPoint.x / SCALE, endPoint.y / SCALE, 0);
-        this.control2 = new ParcelableVector3(control2.x / SCALE, control2.y / SCALE, 0);
+    public BezierCurve(float sx, float sy,
+                       float cx1, float cy1,
+                       float cx2, float cy2,
+                       float ex, float ey,
+                       int width, int height) {
+        this.startPoint = new ParcelableVector3(sx / width, sy / height, 0);
+        this.control1 = new ParcelableVector3(cx1 / width, cy1 / height, 0);
+        this.endPoint = new ParcelableVector3(ex / width, ey / height, 0);
+        this.control2 = new ParcelableVector3(cx2 / width, cy2 / height, 0);
     }
 
     protected BezierCurve(Parcel in) {

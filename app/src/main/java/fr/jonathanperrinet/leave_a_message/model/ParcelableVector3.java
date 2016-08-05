@@ -8,27 +8,27 @@ import android.os.Parcelable;
  */
 public class ParcelableVector3 implements Parcelable {
 
-    public double x;
-    public double y;
-    public double z;
+    public float x;
+    public float y;
+    public float z;
 
-    public ParcelableVector3(double x, double y, double z) {
+    public ParcelableVector3(float x, float y, float z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
     protected ParcelableVector3(Parcel in) {
-        x = in.readDouble();
-        y = in.readDouble();
-        z = in.readDouble();
+        x = in.readFloat();
+        y = in.readFloat();
+        z = in.readFloat();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeDouble(x);
-        dest.writeDouble(y);
-        dest.writeDouble(z);
+        dest.writeFloat(x);
+        dest.writeFloat(y);
+        dest.writeFloat(z);
     }
 
     @Override
@@ -56,4 +56,9 @@ public class ParcelableVector3 implements Parcelable {
                 ", z=" + z +
                 '}';
     }
+
+    public boolean sameAs(ParcelableVector3 vector) {
+        return (x == vector.x) && (y == vector.y) && (z == vector.z);
+    }
+
 }
