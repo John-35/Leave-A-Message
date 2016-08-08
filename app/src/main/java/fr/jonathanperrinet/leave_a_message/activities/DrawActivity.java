@@ -19,6 +19,7 @@ import java.util.ArrayList;
 
 import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
 import fr.jonathanperrinet.leave_a_message.model.BezierCurve;
+import fr.jonathanperrinet.leave_a_message.model.Message;
 import fr.jonathanperrinet.leave_a_message.utils.App_Const;
 
 /**
@@ -27,9 +28,6 @@ import fr.jonathanperrinet.leave_a_message.utils.App_Const;
 public class DrawActivity extends AppCompatActivity {
 
     public static final int REQUEST_CODE = 1;
-
-    private static final int MODE_TEXT = 0;
-    private static final int MODE_DRAW = 1;
 
     private static final String TAG = "DrawActivity";
 
@@ -40,7 +38,7 @@ public class DrawActivity extends AppCompatActivity {
     private SignaturePad pad;
     private FloatingActionsMenu fam;
 
-    private int mode = MODE_DRAW;
+    private int mode = Message.TYPE_DRAW;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,13 +95,14 @@ public class DrawActivity extends AppCompatActivity {
         body.addStringPart("msg", message);
         body.addStringPart("lat", String.valueOf(latitude));
         body.addStringPart("lng", String.valueOf(longitude));
+        body.addStringPart("type", String.valueOf(mode));
         post.setBody(body);
 
         AsyncHttpClient.getDefaultInstance().execute(post, new HttpConnectCallback() {
             @Override
             public void onConnectCompleted(Exception ex, AsyncHttpResponse res) {
                 Log.i(TAG, "Uploaded: " + res);
-                Toast.makeText(DrawActivity.this, "Resultat: " + res, Toast.LENGTH_SHORT).show();
+                Toast.makeText(DrawActivity.this, "Resultat: " + res.message(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -112,15 +111,15 @@ public class DrawActivity extends AppCompatActivity {
 
     private String formatMessage(float rotX, float rotY, float rotZ) {
         StringBuilder builder = new StringBuilder("{")
-                .append("'type':")
+                .append("'" + Message.ATTR_TYPE + "':")
                 .append(mode)
-                .append("'rotX':")
+                .append(",'" + Message.ATTR_ROTX + "':")
                 .append(rotX)
-                .append(", 'rotY':")
+                .append(",'" + Message.ATTR_ROTY + "':")
                 .append(rotY)
-                .append(", 'rotZ':")
+                .append(",'" + Message.ATTR_ROTZ + "':")
                 .append(rotZ)
-                .append(", 'points': [");
+                .append(", '" + Message.ATTR_POINTS + "': [");
 
         ArrayList<BezierCurve> curves = pad.getBeziersCurves();
         for(BezierCurve curve : curves) {
@@ -150,6 +149,7 @@ public class DrawActivity extends AppCompatActivity {
             builder.append(curve.endPoint.z);
             builder.append("]],");
         }
+        builder.deleteCharAt(builder.length() - 1);
         builder.append("]}");
 
         return builder.toString();

@@ -14,11 +14,10 @@ import android.os.StrictMode;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
@@ -38,13 +37,15 @@ import java.util.Iterator;
 
 import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
 import fr.jonathanperrinet.leave_a_message.model.Message;
+import fr.jonathanperrinet.leave_a_message.model.MessageDrawn;
 import fr.jonathanperrinet.leave_a_message.model.MessageString;
 import fr.jonathanperrinet.leave_a_message.utils.App_Const;
+import fr.jonathanperrinet.leave_a_message.utils.MessageManager;
 
 /**
  * Created by Jonathan Perrinet.
  */
-public class DisplayMapActivity extends AppCompatActivity implements LocationListener {
+public class DisplayMapActivity extends AppCompatActivity implements LocationListener, MessageManager.OnMessageListener {
 
     private static final String TAG = "DisplayMapActivity";
 
@@ -139,13 +140,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         mItemOverlay = new ItemizedIconOverlay<>(items, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
             @Override
             public boolean onItemSingleTapUp(int index, OverlayItem item) {
-                MessageString msg = (MessageString)(messages.get(item.getTitle()));
-                //Toast.makeText(DisplayMapActivity.this, msg.getMessage(), Toast.LENGTH_SHORT).show();
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(DisplayMapActivity.this);
-                alertDialogBuilder.setMessage(msg.getMessage())
-                                  .setCancelable(true)
-                                  .show();
-
+                displayMessage(messages.get(item.getTitle()));
                 return true;
             }
 
@@ -165,6 +160,8 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         runUpdateItemPresence = new Runnable() {
             @Override
             public void run() {
+                Log.i(TAG, "run " + messages.keySet());
+
                 if(mGeoPointLocation != null) {
                     GeoPoint itemGeoPoint;
                     Iterator<OverlayItem> it = items.iterator();
@@ -178,95 +175,27 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
                             mItemOverlay.removeItem(item);
                         } else {
                             if (!messages.get(item.getTitle()).isLoaded()) {
-                                openMessageFromServer(messages.get(item.getTitle()));
+                                MessageManager.openMessageFromServer(DisplayMapActivity.this, messages.get(item.getTitle()));
                             }
                         }
                     }
                     mapView.invalidate(); //update the mapview display
-                    downloadMessages(mGeoPointLocation);
+                    MessageManager.downloadMessages(DisplayMapActivity.this, mGeoPointLocation);
                 }
                 handlerUpdate.postDelayed(this, REFRESH_TIME);
             }
         };
-        handlerUpdate.postDelayed(runUpdateItemPresence, REFRESH_TIME);
     }
 
-    private void downloadMessages(GeoPoint location) {
-        //Toast.makeText(this, "Download around " + location.getLatitude() + " ; " + location.getLongitude(), Toast.LENGTH_LONG).show();
-        Ion.with(this)
-                .load(App_Const.URL_LIST)
-                .setMultipartParameter("lat", String.valueOf(location.getLatitude()))
-                .setMultipartParameter("lng", String.valueOf(location.getLongitude()))
-                .setMultipartParameter("dist", String.valueOf(MAX_DISTANCE))
-                .asJsonArray()
-                .setCallback(new FutureCallback<com.google.gson.JsonArray>() {
-                    @Override
-                    public void onCompleted(Exception e, com.google.gson.JsonArray jsonArray) {
-                        if(jsonArray != null) {
-                            Iterator<JsonElement> iterator = jsonArray.iterator();
-                            JsonObject jsonObject;
-                            while(iterator.hasNext()) {
-                                jsonObject = iterator.next().getAsJsonObject();
-                                //Toast.makeText(DisplayMapActivity.this, "obj: " + jsonObject, Toast.LENGTH_SHORT).show();
-                                double latitude = jsonObject.get("lat").getAsDouble();
-                                double longitude = jsonObject.get("lng").getAsDouble();
-                                String url = jsonObject.get("url").getAsString();
-                                if(!messages.containsKey(url)) {
-                                    Message msg = new MessageString(url, latitude, longitude, 0, 0, 0, null);
-                                    messages.put(url, msg);
-                                    mItemOverlay.addItem(new OverlayItem(url, "SampleDescription", new GeoPoint(latitude, longitude)));
-                                    openMessageFromServer(msg);
-                                }
-                            }
-                        }
-                        mapView.invalidate();
-                    }
-                });
-    }
-
-    private void openMessageFromServer(final Message msg) {
-        /*Ion.with(this)
-                .load(App_Const.URL_GET_MESSAGE)
-                .setBodyParameter("url", url)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject jsonObj) {
-                        if(jsonObj != null) {
-                            Toast.makeText(DisplayMapActivity.this, url + " : " + jsonObj.getAsString(), Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(DisplayMapActivity.this, url + " : " + jsonObj, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });*/
-
-        Ion.with(this)
-                .load(App_Const.URL_GET_MESSAGE)
-                .setMultipartParameter("url", msg.getUrl())
-                .asString()
-                .setCallback(new FutureCallback<String>() {
-                    @Override
-                    public void onCompleted(Exception e, String json) {
-                        /*if(json != null) {
-                            try {
-                                JSONObject jsonObj = new JSONObject(json);
-                                ((MessageString)msg).setMessage(jsonObj.toString());
-                                Toast.makeText(DisplayMapActivity.this, json, Toast.LENGTH_SHORT).show();
-                            } catch (JSONException jse) {
-                                Log.e(TAG, jse.getMessage());
-                            }
-                            //Toast.makeText(DisplayMapActivity.this, url + " : " + jsonObj, Toast.LENGTH_SHORT).show();
-                        } else {
-                            //Toast.makeText(DisplayMapActivity.this, url + " : " + jsonObj, Toast.LENGTH_SHORT).show();
-                        }*/
-                        if(json != null) {
-                            ((MessageString) msg).setMessage(json);
-                            msg.setLoaded(true);
-                        } else {
-                            ((MessageString) msg).setMessage(getResources().getString(R.string.erreur_loading_message));
-                        }
-                    }
-                });
+    private void displayMessage(Message msg) {
+        //Toast.makeText(DisplayMapActivity.this, msg.getMessage(), Toast.LENGTH_SHORT).show();
+        Log.i(TAG, "Message: " + msg);
+        if(msg != null) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(DisplayMapActivity.this);
+            alertDialogBuilder.setMessage(msg.toString())
+                    .setCancelable(true)
+                    .show();
+        }
     }
 
     @Override
@@ -279,7 +208,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
 
         mGeoPointLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
         locationOverlay.setLocation(mGeoPointLocation);
-        downloadMessages(mGeoPointLocation);
+        MessageManager.downloadMessages(DisplayMapActivity.this, mGeoPointLocation);
     }
 
     @Override
@@ -315,6 +244,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
     @Override
     protected void onResume() {
         super.onResume();
+        Log.i(TAG, "onResume");
 
         Ion.getDefault(this).cancelAll();
         handlerUpdate.postDelayed(runUpdateItemPresence, REFRESH_TIME);
@@ -331,6 +261,10 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
     @Override
     protected void onPause() {
         super.onPause();
+        Log.i(TAG, "onPause");
+        handlerUpdate.removeCallbacks(runUpdateItemPresence);
+
+        //TODO: enregistrer la liste des messages pour pouvoir les récupérer dans le onResume
 
         //Load last position known
         if(mGeoPointLocation != null) {
@@ -338,10 +272,9 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putFloat(SHARED_PREF_LAT, (float) mGeoPointLocation.getLatitude());
             editor.putFloat(SHARED_PREF_LON, (float) mGeoPointLocation.getLongitude());
-            editor.commit();
+            //TODO: à vérifier (commit --> apply)
+            editor.apply();
         }
-
-        handlerUpdate.removeCallbacks(runUpdateItemPresence);
 
         try {
             locationManager.removeUpdates(this);
@@ -357,5 +290,24 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         } else {
             Toast.makeText(this, "Unknown position", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onMessageReceived(String url, int type, double latitude, double longitude) {
+        //Log.i(TAG, "url: " + url + " at (" + latitude + " ; " + longitude + ")");
+        if(!messages.containsKey(url)) {
+            Message msg = null;
+            if(type == Message.TYPE_DRAW) {
+                msg = new MessageDrawn(url, latitude, longitude);
+            } else if(type == Message.TYPE_TEXT) {
+                msg = new MessageString(url, latitude, longitude);
+            }
+            if(msg != null) {
+                messages.put(url, msg);
+                mItemOverlay.addItem(new OverlayItem(url, "SampleDescription", new GeoPoint(latitude, longitude)));
+                MessageManager.openMessageFromServer(this, msg);
+            }
+        }
+        mapView.invalidate();
     }
 }

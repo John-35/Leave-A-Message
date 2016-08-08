@@ -5,6 +5,15 @@ package fr.jonathanperrinet.leave_a_message.model;
  */
 public abstract class Message {
 
+    public static final int TYPE_DRAW = 1;
+    public static final int TYPE_TEXT = 0;
+
+    public static final String ATTR_TYPE = "type";
+    public static final String ATTR_ROTX = "rotX";
+    public static final String ATTR_ROTY = "rotY";
+    public static final String ATTR_ROTZ = "rotZ";
+    public static final String ATTR_POINTS = "points";
+
     private double latitude, longitude;
 
     private float rotX, rotY, rotZ;
@@ -13,12 +22,9 @@ public abstract class Message {
 
     private String url;
 
-    public Message(String url, double latitude, double longitude, float rotX, float rotY, float rotZ) {
+    public Message(String url, double latitude, double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
-        this.rotX = rotX;
-        this.rotY = rotY;
-        this.rotZ = rotZ;
         this.url = url;
         loaded = false;
     }
@@ -43,7 +49,11 @@ public abstract class Message {
         return rotZ;
     }
 
-    abstract public void display();
+    public void setRotation(float rotX, float rotY, float rotZ) {
+        this.rotX = rotX;
+        this.rotY = rotY;
+        this.rotZ = rotZ;
+    }
 
     public boolean isLoaded() {
         return loaded;
@@ -57,7 +67,5 @@ public abstract class Message {
         return url;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+    public abstract void setContent(Object content);
 }

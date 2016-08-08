@@ -5,23 +5,25 @@ package fr.jonathanperrinet.leave_a_message.model;
  */
 public class MessageString extends Message {
 
-    private String message;
+    private String text;
 
-    public MessageString(String url, double latitude, double longitude, float rotX, float rotY, float rotZ, String message) {
-        super(url, latitude, longitude, rotX, rotY, rotZ);
-        this.message = message;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    public MessageString(String url, double latitude, double longitude) {
+        super(url, latitude, longitude);
     }
 
     @Override
-    public void display() {
-
+    public void setContent(Object content) {
+        if(content instanceof String) {
+            setText((String)content);
+        }
     }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
 }

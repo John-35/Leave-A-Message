@@ -24,6 +24,17 @@ public class BezierCurve implements Parcelable {
         this.control2 = new ParcelableVector3(cx2 / width, cy2 / height, 0);
     }
 
+    public BezierCurve(ParcelableVector3[] points) throws Exception {
+        if(points.length != 4) {
+            throw new Exception("Nombre de points invalides ! Attendu : 4, Obtenu : " + points.length);
+        }
+
+        this.startPoint = points[0];
+        this.control1 = points[1];
+        this.control2 = points[2];
+        this.endPoint = points[3];
+    }
+
     protected BezierCurve(Parcel in) {
         startPoint = in.readParcelable(ParcelableVector3.class.getClassLoader());
         control1 = in.readParcelable(ParcelableVector3.class.getClassLoader());
