@@ -1,24 +1,16 @@
 package fr.jonathanperrinet.leave_a_message.activities;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.StrictMode;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
 import org.osmdroid.api.IMapController;
@@ -39,13 +31,12 @@ import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
 import fr.jonathanperrinet.leave_a_message.model.Message;
 import fr.jonathanperrinet.leave_a_message.model.MessageDrawn;
 import fr.jonathanperrinet.leave_a_message.model.MessageString;
-import fr.jonathanperrinet.leave_a_message.utils.App_Const;
 import fr.jonathanperrinet.leave_a_message.utils.MessageManager;
 
 /**
  * Created by Jonathan Perrinet.
  */
-public class DisplayMapActivity extends AppCompatActivity implements LocationListener, MessageManager.OnMessageListener {
+public class DisplayMapActivity extends LocatedActivity implements MessageManager.OnMessageListener {
 
     private static final String TAG = "DisplayMapActivity";
 
@@ -58,13 +49,8 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
 
     private final int REFRESH_TIME = 10000;
 
-    private final long MIN_TIME = 500; //milliseconds
-    private final float GPS_MIN_DIST = 1; //meters
-
     private final double MAX_DISTANCE = 0.5; // km
     private final int MAX_VIEWFIELD = 500; //meters
-
-    private LocationManager locationManager;
 
     private IMapController mapController;
 
@@ -98,19 +84,7 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
 
         setContentView(R.layout.activity_map);
 
-        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, GPS_MIN_DIST, this);
-
-        boolean enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        if (!enabled) {
-            //TODO: gestion position indisponible
-        }
+        //StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
 
         mapView = (MapView) findViewById(R.id.map);
         String[] urls = {TILE_URL};
@@ -198,35 +172,6 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
         }
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        GeoPoint position = new GeoPoint(location.getLatitude(), location.getLongitude());
-        if(firstTime) {
-            mapController.setCenter(position);
-            firstTime = false;
-        }
-
-        mGeoPointLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
-        locationOverlay.setLocation(mGeoPointLocation);
-        MessageManager.downloadMessages(DisplayMapActivity.this, mGeoPointLocation);
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        //Toast.makeText(this, "Enabled new provider " + provider, Toast.LENGTH_SHORT).show();
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        //Toast.makeText(this, "Disabled provider " + provider, Toast.LENGTH_SHORT).show();
-    }
-
     /*
         Starts the draw activity when the user clicks on the floating button
      */
@@ -248,16 +193,8 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
 
         Ion.getDefault(this).cancelAll();
         handlerUpdate.postDelayed(runUpdateItemPresence, REFRESH_TIME);
-
-        try {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, GPS_MIN_DIST, this);
-        } catch (SecurityException se) {
-            se.printStackTrace();
-        }
-
     }
 
-    /* Remove the locationlistener updates when Activity is paused */
     @Override
     protected void onPause() {
         super.onPause();
@@ -275,12 +212,19 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
             //TODO: à vérifier (commit --> apply)
             editor.apply();
         }
+    }
 
-        try {
-            locationManager.removeUpdates(this);
-        } catch (SecurityException se) {
-            se.printStackTrace();
+    @Override
+    public void onLocationChanged(Location location) {
+        GeoPoint position = new GeoPoint(location.getLatitude(), location.getLongitude());
+        if(firstTime) {
+            mapController.setCenter(position);
+            firstTime = false;
         }
+
+        mGeoPointLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
+        locationOverlay.setLocation(mGeoPointLocation);
+        MessageManager.downloadMessages(DisplayMapActivity.this, mGeoPointLocation);
     }
 
     public void onClickCenterPosition(View view) {
@@ -309,5 +253,11 @@ public class DisplayMapActivity extends AppCompatActivity implements LocationLis
             }
         }
         mapView.invalidate();
+    }
+
+    public void onClickAugmentedView(View view) {
+        //TODO: replier le menu de floating buttons
+        Intent intent = new Intent(this, AugmentedViewActivity.class);
+        startActivity(intent);
     }
 }

@@ -8,6 +8,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -33,7 +34,7 @@ import fr.jonathanperrinet.leave_a_message.utils.CameraView;
 /**
  * Created by Jonathan Perrinet.
  */
-public class AugmentedViewActivity extends AppCompatActivity implements MessagesRenderer.RendererListener, SensorEventListener {
+public class AugmentedViewActivity extends LocatedActivity implements MessagesRenderer.RendererListener, SensorEventListener {
 
     public static final String INTENT_ROT_X = "ax";
     public static final String INTENT_ROT_Y = "ay";
@@ -115,6 +116,11 @@ public class AugmentedViewActivity extends AppCompatActivity implements Messages
     protected void onPause() {
         super.onPause();
         sensorManager.unregisterListener(this);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+
     }
 
     @Override

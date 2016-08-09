@@ -1,9 +1,12 @@
 package fr.jonathanperrinet.leave_a_message.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Jonathan Perrinet on 01/07/2016.
  */
-public abstract class Message {
+public abstract class Message implements Parcelable {
 
     public static final int TYPE_DRAW = 1;
     public static final int TYPE_TEXT = 0;
@@ -27,6 +30,16 @@ public abstract class Message {
         this.longitude = longitude;
         this.url = url;
         loaded = false;
+    }
+
+    public Message(Parcel in) {
+        latitude = in.readDouble();
+        longitude = in.readDouble();
+        rotX = in.readFloat();
+        rotY = in.readFloat();
+        rotZ = in.readFloat();
+        loaded = in.readInt() == 1;
+        url = in.readString();
     }
 
     public double getLatitude() {
@@ -68,4 +81,20 @@ public abstract class Message {
     }
 
     public abstract void setContent(Object content);
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int i) {
+        dest.writeDouble(latitude);
+        dest.writeDouble(longitude);
+        dest.writeFloat(rotX);
+        dest.writeFloat(rotY);
+        dest.writeFloat(rotZ);
+        dest.writeInt(loaded ? 1 : 0);
+        dest.writeString(url);
+    }
 }

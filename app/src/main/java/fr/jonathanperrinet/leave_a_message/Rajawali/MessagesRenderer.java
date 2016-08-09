@@ -85,9 +85,11 @@ public class MessagesRenderer extends RajawaliRenderer {
             //    addSvg(msg);
             //}
             List<BezierCurve> curves = listener.getCurves();
-            Log.i(TAG, "curves: " + curves.size());
-            if(curves.size() > 0) {
-                addBezier(curves);
+            if(curves != null) {
+                Log.i(TAG, "curves: " + curves.size());
+                if (curves.size() > 0) {
+                    addBezier(curves);
+                }
             }
         }
     }

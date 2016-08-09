@@ -82,6 +82,7 @@ public class MessageManager {
                                 if(jsonObj.has(Message.ATTR_TYPE)) {
                                     int type = jsonObj.getInt(Message.ATTR_TYPE);
                                     if(type == Message.TYPE_DRAW) {
+                                        List<BezierCurve> curves = new ArrayList<>();
                                         float rotX = getRotation(jsonObj, Message.ATTR_ROTX);
                                         float rotY = getRotation(jsonObj, Message.ATTR_ROTY);
                                         float rotZ = getRotation(jsonObj, Message.ATTR_ROTZ);
@@ -99,8 +100,7 @@ public class MessageManager {
                                                                                                 (float) point.getDouble(2));
                                                     }
                                                     try {
-                                                        BezierCurve curve = new BezierCurve(curvePoints);
-                                                        Log.i(TAG, "curve: " + curve);
+                                                        curves.add(new BezierCurve(curvePoints));
                                                     } catch (Exception e1) {
                                                         Log.e(TAG, e1.getMessage());
                                                     }
@@ -108,6 +108,7 @@ public class MessageManager {
 
                                             }
                                         }
+                                        msg.setContent(curves);
                                     } else {
                                         msg.setContent(jsonObj.toString());
                                     }

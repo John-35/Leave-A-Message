@@ -28,5 +28,5 @@ dependencies {
     compile 'com.koushikdutta.ion:ion:2.+'
     compile 'org.rajawali3d:rajawali:1.0.325@aar'
     compile 'com.getbase:floatingactionbutton:1.10.1'
-    //compile 'com.github.gcacace:signature-pad:1.2.0'
+    compile 'org.greenrobot:eventbus:3.0.0'
 }
