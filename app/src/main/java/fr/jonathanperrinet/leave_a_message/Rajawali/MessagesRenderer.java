@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
+import org.rajawali3d.Object3D;
 import org.rajawali3d.cameras.Camera;
 import org.rajawali3d.curves.CompoundCurve3D;
 import org.rajawali3d.curves.CubicBezierCurve3D;
@@ -17,10 +18,14 @@ import org.rajawali3d.primitives.Line3D;
 import org.rajawali3d.primitives.Sphere;
 import org.rajawali3d.renderer.RajawaliRenderer;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
 import fr.jonathanperrinet.leave_a_message.model.BezierCurve;
+import fr.jonathanperrinet.leave_a_message.model.Message;
+import fr.jonathanperrinet.leave_a_message.model.MessageDrawn;
 import fr.jonathanperrinet.leave_a_message.model.ParcelableVector3;
 
 /**
@@ -45,7 +50,7 @@ public class MessagesRenderer extends RajawaliRenderer {
     RendererListener listener = null;
 
     public interface RendererListener {
-        List<String> getMessages();
+        HashMap<String, Message> getMessages();
         List<BezierCurve> getCurves();
     }
 
@@ -79,19 +84,7 @@ public class MessagesRenderer extends RajawaliRenderer {
         quatCameraInit = getCurrentCamera().getOrientation();
         Log.i(TAG, "Quat ini: " + quatCameraInit);
 
-        if(listener != null) {
-            //List<String> messages = listener.getMessages();
-            //for (String msg : messages) {
-            //    addSvg(msg);
-            //}
-            List<BezierCurve> curves = listener.getCurves();
-            if(curves != null) {
-                Log.i(TAG, "curves: " + curves.size());
-                if (curves.size() > 0) {
-                    addBezier(curves);
-                }
-            }
-        }
+        createMessageObjects();
     }
 
     @Override
@@ -125,6 +118,41 @@ public class MessagesRenderer extends RajawaliRenderer {
         }
     }
 
+    public void createMessageObjects() {
+        if(listener != null) {
+            //List<String> messages = listener.getMessages();
+            //for (String msg : messages) {
+            //    addSvg(msg);
+            //}
+            /*List<BezierCurve> curves = listener.getCurves();
+            if(curves != null) {
+                Log.i(TAG, "curves: " + curves.size());
+                if (curves.size() > 0) {
+                    addBezier(curves);
+                }
+            }*/
+
+            HashMap<String, Message> messages = listener.getMessages();
+            if(messages != null) {
+                for(String key : messages.keySet()) {
+                    Message msg = messages.get(key);
+                    if(msg.isLoaded()) {
+                        if(msg instanceof MessageDrawn) {
+                            addBezier(key, ((MessageDrawn) msg).getCurves());
+                        }
+                    }
+
+                }
+            }
+            //Message[] messages = listener.getMessages();
+            /*if(messages != null) {
+                for (Message message : messages) {
+                    Log.i(TAG, "msg: " + message);
+                }
+            }*/
+        }
+    }
+
     /*@Override
     public void onRender(final long elapsedTime, final double deltaTime) {
         super.onRender(elapsedTime, deltaTime);
@@ -136,13 +164,18 @@ public class MessagesRenderer extends RajawaliRenderer {
         return (value - aFrom) / (aTo - aFrom) * (bTo - bFrom) + bFrom;
     }*/
 
-    private void addBezier(List<BezierCurve> curves) {
+    private void addBezier(String name, List<BezierCurve> curves) {
         final int SCALE = 100;
+        Log.i(TAG, "addBezier: " + curves);
 
-        CompoundCurve3D compound = new CompoundCurve3D();
-        ParcelableVector3 lastPoint = null;
+        if(curves != null) {
 
-        for(int i = 0 ; i < curves.size() ; i++) {
+            Object3D obj = new Object3D(name);
+
+            CompoundCurve3D compound = new CompoundCurve3D();
+            ParcelableVector3 lastPoint = null;
+
+        /*for(int i = 0 ; i < curves.size() ; i++) {
             BezierCurve curve = curves.get(i);
             Log.i(TAG, "Add curve to scene: " + curve);
             CubicBezierCurve3D cubicBezierCurve = new CubicBezierCurve3D(new Vector3(curve.startPoint.x * SCALE, (1 - curve.startPoint.y) * SCALE, curve.startPoint.z),
@@ -151,17 +184,40 @@ public class MessagesRenderer extends RajawaliRenderer {
                     new Vector3(curve.endPoint.x * SCALE, (1 - curve.endPoint.y) * SCALE, curve.endPoint.z));
 
             if(lastPoint != null && !curve.startPoint.sameAs(lastPoint)) {
-                drawCurve(compound);
+                //drawCurve(name, compound);
+                obj.addChild(computeCurve(compound));
                 compound = new CompoundCurve3D();
             }
 
             compound.addCurve(cubicBezierCurve);
             lastPoint = curve.endPoint;
         }
-        drawCurve(compound);
+        if(compound.getNumCurves() > 0) {
+            //drawCurve(name, compound);
+            obj.addChild(computeCurve(compound));
+        }*/
+
+            getCurrentScene().addChild(obj);
+        }
     }
 
-    private void drawCurve(ICurve3D curve) {
+    private Line3D computeCurve(ICurve3D curve) {
+        Stack<Vector3> points = new Stack<>();
+        int subdiv = 100;
+        for (int j = 0; j <= subdiv; j++) {
+            Vector3 point = new Vector3();
+            curve.calculatePoint(point, (float) j / (float) subdiv);
+            points.push(point);
+        }
+
+        Log.i(TAG, "points: " + points.size());
+        Line3D line = new Line3D(points, 10);
+        line.setMaterial(material);
+
+        return line;
+    }
+
+    private void drawCurve(String name, ICurve3D curve) {
         Stack<Vector3> points = new Stack<>();
         int subdiv = 100;
         for (int j = 0; j <= subdiv; j++) {

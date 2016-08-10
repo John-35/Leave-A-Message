@@ -97,4 +97,28 @@ public abstract class Message implements Parcelable {
         dest.writeInt(loaded ? 1 : 0);
         dest.writeString(url);
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "url='" + url + '\'' +
+                ", loaded=" + loaded +
+                '}';
+    }
+
+    /*public String toJSonFormat() {
+        StringBuilder builder = new StringBuilder("'")
+                .append(ATTR_ROTX)
+                .append("':")
+                .append(rotX)
+                .append(",'")
+                .append(ATTR_ROTY)
+                .append("':")
+                .append(rotY)
+                .append(",'")
+                .append(ATTR_ROTZ)
+                .append("':")
+                .append(rotZ);
+        return builder.toString();
+    }*/
 }

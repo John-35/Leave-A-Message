@@ -29,14 +29,12 @@ import java.util.Iterator;
 
 import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
 import fr.jonathanperrinet.leave_a_message.model.Message;
-import fr.jonathanperrinet.leave_a_message.model.MessageDrawn;
-import fr.jonathanperrinet.leave_a_message.model.MessageString;
 import fr.jonathanperrinet.leave_a_message.utils.MessageManager;
 
 /**
  * Created by Jonathan Perrinet.
  */
-public class DisplayMapActivity extends LocatedActivity implements MessageManager.OnMessageListener {
+public class DisplayMapActivity extends LocatedActivity {
 
     private static final String TAG = "DisplayMapActivity";
 
@@ -49,19 +47,12 @@ public class DisplayMapActivity extends LocatedActivity implements MessageManage
 
     private final int REFRESH_TIME = 10000;
 
-    private final double MAX_DISTANCE = 0.5; // km
-    private final int MAX_VIEWFIELD = 500; //meters
-
     private IMapController mapController;
-
-    private GeoPoint mGeoPointLocation = null;
 
     ArrayList<OverlayItem> items;
     ItemizedIconOverlay<OverlayItem> mItemOverlay;
 
     private SimpleLocationOverlay locationOverlay;
-
-    HashMap<String, Message> messages = new HashMap<>();
 
     boolean firstTime = true;
 
@@ -130,20 +121,21 @@ public class DisplayMapActivity extends LocatedActivity implements MessageManage
             handlerUpdate launch Runnable runUpdateItemPresence each REFRESH_TIME milliseconds.
             It checks if it exists items at a distance > MAX_VIEWFIELD and removes them if true
          */
+        //TODO: refactoriser cette méthode et la mettre dans LocatedActivity
         handlerUpdate = new Handler();
         runUpdateItemPresence = new Runnable() {
             @Override
             public void run() {
                 Log.i(TAG, "run " + messages.keySet());
 
-                if(mGeoPointLocation != null) {
+                if(myPosition != null) {
                     GeoPoint itemGeoPoint;
                     Iterator<OverlayItem> it = items.iterator();
                     while (it.hasNext()) {
                         OverlayItem item = it.next();
                         itemGeoPoint = (GeoPoint) item.getPoint();
-                        int distance = mGeoPointLocation.distanceTo(itemGeoPoint);
-                        if (distance > MAX_VIEWFIELD) {
+                        int distance = myPosition.distanceTo(itemGeoPoint);
+                        if (distance > MessageManager.MAX_DISTANCE * 1000) {
                             messages.remove(item.getTitle());
                             it.remove();
                             mItemOverlay.removeItem(item);
@@ -154,7 +146,7 @@ public class DisplayMapActivity extends LocatedActivity implements MessageManage
                         }
                     }
                     mapView.invalidate(); //update the mapview display
-                    MessageManager.downloadMessages(DisplayMapActivity.this, mGeoPointLocation);
+                    MessageManager.downloadMessages(DisplayMapActivity.this, myPosition);
                 }
                 handlerUpdate.postDelayed(this, REFRESH_TIME);
             }
@@ -162,8 +154,7 @@ public class DisplayMapActivity extends LocatedActivity implements MessageManage
     }
 
     private void displayMessage(Message msg) {
-        //Toast.makeText(DisplayMapActivity.this, msg.getMessage(), Toast.LENGTH_SHORT).show();
-        Log.i(TAG, "Message: " + msg);
+        Log.i(TAG, "displayMessage " + msg);
         if(msg != null) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(DisplayMapActivity.this);
             alertDialogBuilder.setMessage(msg.toString())
@@ -176,10 +167,10 @@ public class DisplayMapActivity extends LocatedActivity implements MessageManage
         Starts the draw activity when the user clicks on the floating button
      */
     public void onClickFabBtn(View view) {
-        if(mGeoPointLocation != null) {
+        if(myPosition != null) {
             Intent intent = new Intent(this, DrawActivity.class);
-            intent.putExtra(INTENT_LOCATION_LAT, mGeoPointLocation.getLatitude());
-            intent.putExtra(INTENT_LOCATION_LONG, mGeoPointLocation.getLongitude());
+            intent.putExtra(INTENT_LOCATION_LAT, myPosition.getLatitude());
+            intent.putExtra(INTENT_LOCATION_LONG, myPosition.getLongitude());
             startActivity(intent);
         } else {
             Toast.makeText(this, "Your position is not set !", Toast.LENGTH_SHORT).show();
@@ -189,8 +180,6 @@ public class DisplayMapActivity extends LocatedActivity implements MessageManage
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i(TAG, "onResume");
-
         Ion.getDefault(this).cancelAll();
         handlerUpdate.postDelayed(runUpdateItemPresence, REFRESH_TIME);
     }
@@ -198,17 +187,16 @@ public class DisplayMapActivity extends LocatedActivity implements MessageManage
     @Override
     protected void onPause() {
         super.onPause();
-        Log.i(TAG, "onPause");
         handlerUpdate.removeCallbacks(runUpdateItemPresence);
 
         //TODO: enregistrer la liste des messages pour pouvoir les récupérer dans le onResume
 
         //Load last position known
-        if(mGeoPointLocation != null) {
+        if(myPosition != null) {
             SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putFloat(SHARED_PREF_LAT, (float) mGeoPointLocation.getLatitude());
-            editor.putFloat(SHARED_PREF_LON, (float) mGeoPointLocation.getLongitude());
+            editor.putFloat(SHARED_PREF_LAT, (float) myPosition.getLatitude());
+            editor.putFloat(SHARED_PREF_LON, (float) myPosition.getLongitude());
             //TODO: à vérifier (commit --> apply)
             editor.apply();
         }
@@ -216,48 +204,46 @@ public class DisplayMapActivity extends LocatedActivity implements MessageManage
 
     @Override
     public void onLocationChanged(Location location) {
-        GeoPoint position = new GeoPoint(location.getLatitude(), location.getLongitude());
+        super.onLocationChanged(location);
+
         if(firstTime) {
-            mapController.setCenter(position);
+            mapController.setCenter(myPosition);
             firstTime = false;
         }
 
-        mGeoPointLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
-        locationOverlay.setLocation(mGeoPointLocation);
-        MessageManager.downloadMessages(DisplayMapActivity.this, mGeoPointLocation);
+        locationOverlay.setLocation(myPosition);
     }
 
     public void onClickCenterPosition(View view) {
-        if(mGeoPointLocation != null) {
-            Toast.makeText(this, "Your are at position : " + mGeoPointLocation, Toast.LENGTH_SHORT).show();
-            mapController.animateTo(mGeoPointLocation);
+        if(myPosition != null) {
+            Toast.makeText(this, "Your are at position : " + myPosition, Toast.LENGTH_SHORT).show();
+            mapController.animateTo(myPosition);
         } else {
             Toast.makeText(this, "Unknown position", Toast.LENGTH_SHORT).show();
         }
     }
 
-    @Override
-    public void onMessageReceived(String url, int type, double latitude, double longitude) {
-        //Log.i(TAG, "url: " + url + " at (" + latitude + " ; " + longitude + ")");
-        if(!messages.containsKey(url)) {
-            Message msg = null;
-            if(type == Message.TYPE_DRAW) {
-                msg = new MessageDrawn(url, latitude, longitude);
-            } else if(type == Message.TYPE_TEXT) {
-                msg = new MessageString(url, latitude, longitude);
-            }
-            if(msg != null) {
-                messages.put(url, msg);
-                mItemOverlay.addItem(new OverlayItem(url, "SampleDescription", new GeoPoint(latitude, longitude)));
-                MessageManager.openMessageFromServer(this, msg);
-            }
-        }
-        mapView.invalidate();
-    }
-
     public void onClickAugmentedView(View view) {
         //TODO: replier le menu de floating buttons
         Intent intent = new Intent(this, AugmentedViewActivity.class);
+        HashMap<String, Message> test = new HashMap<>();
+
+        for(String key : messages.keySet()) {
+            Log.i(TAG, key + " is " + messages.get(key));
+        }
+        intent.putExtra(LocatedActivity.INTENT_MESSAGES, test);
         startActivity(intent);
+    }
+
+    @Override
+    public void onMessageAdded(Message msg) {
+        Log.i(TAG, "onMessageAdded: " + msg);
+        mItemOverlay.addItem(new OverlayItem(msg.getUrl(), "SampleDescription", new GeoPoint(msg.getLatitude(), msg.getLongitude())));
+        mapView.invalidate();
+    }
+
+    @Override
+    public void onMessageRemoved(Message msg) {
+        Log.i(TAG, "onMessageRemoved: " + msg);
     }
 }

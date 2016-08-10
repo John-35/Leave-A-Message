@@ -27,7 +27,7 @@ import fr.jonathanperrinet.leave_a_message.model.ParcelableVector3;
  */
 public class MessageManager {
 
-    private static final double MAX_DISTANCE = 0.5; // km
+    public static final double MAX_DISTANCE = 10; // km
     private static final String TAG = "MessageManager";
 
     public interface OnMessageListener {
@@ -40,6 +40,7 @@ public class MessageManager {
             throw new ClassCastException(context.toString() + " must implements MessageManager.OnMessageListener");
         }
 
+        Log.i(TAG, "downloadMessages near " + location);
         Ion.with(context)
                 .load(App_Const.URL_LIST)
                 .setMultipartParameter("lat", String.valueOf(location.getLatitude()))
@@ -53,12 +54,16 @@ public class MessageManager {
                             Iterator<JsonElement> iterator = jsonArray.iterator();
                             JsonObject jsonObject;
                             while(iterator.hasNext()) {
-                                jsonObject = iterator.next().getAsJsonObject();
-                                double latitude = jsonObject.get("lat").getAsDouble();
-                                double longitude = jsonObject.get("lng").getAsDouble();
-                                String url = jsonObject.get("url").getAsString();
-                                int type = Message.TYPE_DRAW;//jsonObject.get("type").getAsInt();
-                                ((OnMessageListener)(context)).onMessageReceived(url, type, latitude, longitude);
+                                try {
+                                    jsonObject = iterator.next().getAsJsonObject();
+                                    double latitude = jsonObject.get("lat").getAsDouble();
+                                    double longitude = jsonObject.get("lng").getAsDouble();
+                                    String url = jsonObject.get("url").getAsString();
+                                    int type = jsonObject.get("type").getAsInt();
+                                    ((OnMessageListener) (context)).onMessageReceived(url, type, latitude, longitude);
+                                } catch (Exception ex) {
+                                    Log.e(TAG, "Erreur lors du listing des messages : " + ex.getMessage());
+                                }
                             }
                         }
                     }
@@ -73,7 +78,6 @@ public class MessageManager {
                 .setCallback(new FutureCallback<String>() {
                     @Override
                     public void onCompleted(Exception e, String json) {
-                        Log.i(TAG, json);
                         //TODO: récupérer les données du message
                         if(json != null) {
                             try {
@@ -109,18 +113,21 @@ public class MessageManager {
                                             }
                                         }
                                         msg.setContent(curves);
+                                        msg.setLoaded(true);
                                     } else {
-                                        msg.setContent(jsonObj.toString());
+                                        if(jsonObj.has("text")) {
+                                            msg.setContent(jsonObj.getString("text"));
+                                            msg.setLoaded(true);
+                                        }
                                     }
                                 }
-                                Log.i(TAG, "type: " + jsonObj);
+                                Log.i(TAG, "Msg open : " + msg);
                             } catch (JSONException je) {
                                 Log.e(TAG, "Erreur : " + je.getMessage());
                             }
                         } else {
                             //((MessageString) msg).setMessage(getResources().getString(R.string.erreur_loading_message));
                         }
-                        msg.setLoaded(true);
                     }
                 });
     }

@@ -26,4 +26,8 @@ public class MessageString extends Message {
         this.text = text;
     }
 
+    @Override
+    public String toString() {
+        return text;
+    }
 }

@@ -23,12 +23,15 @@ import android.widget.Toast;
 import org.rajawali3d.surface.IRajawaliSurface;
 import org.rajawali3d.surface.RajawaliSurfaceView;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import fr.jonathanperrinet.leave_a_message.Rajawali.MessagesRenderer;
 import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
 import fr.jonathanperrinet.leave_a_message.model.BezierCurve;
+import fr.jonathanperrinet.leave_a_message.model.Message;
 import fr.jonathanperrinet.leave_a_message.utils.CameraView;
 
 /**
@@ -40,7 +43,7 @@ public class AugmentedViewActivity extends LocatedActivity implements MessagesRe
     public static final String INTENT_ROT_Y = "ay";
     public static final String INTENT_ROT_Z = "az";
 
-    private static final String TAG = "Activity3D";
+    private static final String TAG = "AugmentedViewActivity";
     MessagesRenderer renderer;
 
     private CameraView cameraView = null;
@@ -63,6 +66,18 @@ public class AugmentedViewActivity extends LocatedActivity implements MessagesRe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_augmented_view);
+
+        Intent intent = getIntent();
+        Log.i(TAG, "Intent: " + intent);
+        if(intent != null) {
+            Serializable value = intent.getSerializableExtra(INTENT_MESSAGES);
+            Log.i(TAG, "Value intent: " + value);
+            try {
+                messages = (HashMap<String, Message>) value;
+            } catch (ClassCastException cce) {
+                Log.e(TAG, cce.getMessage());
+            }
+        }
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
@@ -124,15 +139,18 @@ public class AugmentedViewActivity extends LocatedActivity implements MessagesRe
     }
 
     @Override
-    public List<String> getMessages() {
-        List<String> messages = new ArrayList<>();
-        //TODO: à mettre à jour
-        /*Intent intent = getIntent();
-        if(intent != null) {
-            String svg = intent.getStringExtra("svg");
-            messages.add(svg);
-        }*/
+    public void onMessageAdded(Message msg) {
 
+    }
+
+    @Override
+    public void onMessageRemoved(Message msg) {
+
+    }
+
+    @Override
+    public HashMap<String, Message> getMessages() {
+        Log.i(TAG, "getMessages: " + messages);
         return messages;
     }
 

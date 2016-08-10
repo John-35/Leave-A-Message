@@ -60,4 +60,12 @@ public class MessageDrawn extends Message {
         super.writeToParcel(dest, i);
         dest.writeList(curves);
     }
+
+    @Override
+    public String toString() {
+        return "MessageDrawn{" +
+                "curves=" + curves.size() + ", " +
+                super.toString() +
+                '}';
+    }
 }

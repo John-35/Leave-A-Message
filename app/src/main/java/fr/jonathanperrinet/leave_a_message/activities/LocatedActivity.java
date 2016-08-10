@@ -7,16 +7,31 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import org.osmdroid.util.GeoPoint;
+
+import java.util.HashMap;
+
+import fr.jonathanperrinet.leave_a_message.model.Message;
+import fr.jonathanperrinet.leave_a_message.model.MessageDrawn;
+import fr.jonathanperrinet.leave_a_message.model.MessageString;
+import fr.jonathanperrinet.leave_a_message.utils.MessageManager;
+
 /**
  * Created by Jonathan Perrinet on 09/08/2016.
  */
-public abstract class LocatedActivity extends AppCompatActivity implements LocationListener {
+public abstract class LocatedActivity extends AppCompatActivity implements LocationListener, MessageManager.OnMessageListener {
     private static final String TAG = "LocatedActivity";
+
+    public static final String INTENT_MESSAGES = "messages";
 
     private LocationManager locationManager;
 
     private final long MIN_TIME = 500; //milliseconds
     private final float GPS_MIN_DIST = 1; //meters
+
+    protected GeoPoint myPosition = null;
+
+    protected HashMap<String, Message> messages = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +72,10 @@ public abstract class LocatedActivity extends AppCompatActivity implements Locat
 
 
     @Override
-    public abstract void onLocationChanged(Location location);
+    public void onLocationChanged(Location location) {
+        myPosition = new GeoPoint(location.getLatitude(), location.getLongitude());
+        MessageManager.downloadMessages(this, myPosition);
+    }
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
@@ -73,4 +91,28 @@ public abstract class LocatedActivity extends AppCompatActivity implements Locat
     public void onProviderDisabled(String s) {
 
     }
+
+    @Override
+    public void onMessageReceived(String url, int type, double latitude, double longitude) {
+        //Log.i(TAG, "onMessageReceived " + url);
+        if(!messages.containsKey(url)) {
+            Message msg = null;
+            Log.i(TAG, "onMessageReceived: " + url + " (" + type + ")");
+            if(type == Message.TYPE_DRAW) {
+                msg = new MessageDrawn(url, latitude, longitude);
+            } else if(type == Message.TYPE_TEXT) {
+                msg = new MessageString(url, latitude, longitude);
+            }
+            if(msg != null) {
+                messages.put(url, msg);
+                //Log.i(TAG, "put " + messages);
+                onMessageAdded(msg);
+                MessageManager.openMessageFromServer(this, msg);
+            }
+        }
+    }
+
+    public abstract void onMessageAdded(Message msg);
+
+    public abstract void onMessageRemoved(Message msg);
 }
