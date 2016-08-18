@@ -6,19 +6,41 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="fr.jonathanperrinet.leave_a_message.activities.DrawActivity">
 
-    <!--<TextView
-        android:id="@+id/txtview_msg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/votre_message"/>-->
-
-    <com.github.gcacace.signaturepad.views.SignaturePad
-        android:id="@+id/pad"
+    <ViewSwitcher
+        android:id="@+id/switcher"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:penColor="@android:color/white"/>
+        android:layout_height="match_parent">
 
-   <android.support.v7.widget.SwitchCompat
+        <com.github.gcacace.signaturepad.views.SignaturePad
+            android:id="@+id/pad"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:penColor="@android:color/white"/>
+
+        <android.support.v7.widget.LinearLayoutCompat
+            android:id="@+id/view_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp"
+            android:orientation="vertical"
+            android:visibility="invisible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/votre_message"/>
+
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/editTextMsg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </android.support.v7.widget.LinearLayoutCompat>
+
+    </ViewSwitcher>
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/switchBtt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"

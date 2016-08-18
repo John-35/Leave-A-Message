@@ -3,9 +3,15 @@ package fr.jonathanperrinet.leave_a_message.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.LinearLayoutCompat;
+import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.github.gcacace.signaturepad.views.SignaturePad;
@@ -25,7 +31,7 @@ import fr.jonathanperrinet.leave_a_message.utils.App_Const;
 /**
  * Created by Jonathan Perrinet.
  */
-public class DrawActivity extends AppCompatActivity {
+public class DrawActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
 
     public static final int REQUEST_CODE = 1;
 
@@ -35,6 +41,8 @@ public class DrawActivity extends AppCompatActivity {
     private double latitude;
     private double longitude;
 
+    private AppCompatEditText editText;
+    private ViewSwitcher switcher;
     private SignaturePad pad;
     private FloatingActionsMenu fam;
 
@@ -73,6 +81,13 @@ public class DrawActivity extends AppCompatActivity {
 
             }
         });
+
+        switcher = (ViewSwitcher)findViewById(R.id.switcher);
+
+        editText = (AppCompatEditText)findViewById(R.id.editTextMsg);
+
+        SwitchCompat switchCompat = (SwitchCompat)findViewById(R.id.switchBtt);
+        switchCompat.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -118,45 +133,52 @@ public class DrawActivity extends AppCompatActivity {
                 .append(",'" + Message.ATTR_ROTY + "':")
                 .append(rotY)
                 .append(",'" + Message.ATTR_ROTZ + "':")
-                .append(rotZ)
-                .append(", '" + Message.ATTR_POINTS + "': [");
+                .append(rotZ);
 
-        ArrayList<BezierCurve> curves = pad.getBeziersCurves();
-        for(BezierCurve curve : curves) {
-            builder.append("[[");
-            builder.append(curve.startPoint.x);
-            builder.append(",");
-            builder.append(curve.startPoint.y);
-            builder.append(",");
-            builder.append(curve.startPoint.z);
-            builder.append("],[");
-            builder.append(curve.control1.x);
-            builder.append(",");
-            builder.append(curve.control1.y);
-            builder.append(",");
-            builder.append(curve.control1.z);
-            builder.append("],[");
-            builder.append(curve.control2.x);
-            builder.append(",");
-            builder.append(curve.control2.y);
-            builder.append(",");
-            builder.append(curve.control2.z);
-            builder.append("],[");
-            builder.append(curve.endPoint.x);
-            builder.append(",");
-            builder.append(curve.endPoint.y);
-            builder.append(",");
-            builder.append(curve.endPoint.z);
-            builder.append("]],");
+        if(mode == Message.TYPE_DRAW) {
+            builder.append(", '" + Message.ATTR_POINTS + "': [");
+
+            ArrayList<BezierCurve> curves = pad.getBeziersCurves();
+            for (BezierCurve curve : curves) {
+                builder.append("[[");
+                builder.append(curve.startPoint.x);
+                builder.append(",");
+                builder.append(curve.startPoint.y);
+                builder.append(",");
+                builder.append(curve.startPoint.z);
+                builder.append("],[");
+                builder.append(curve.control1.x);
+                builder.append(",");
+                builder.append(curve.control1.y);
+                builder.append(",");
+                builder.append(curve.control1.z);
+                builder.append("],[");
+                builder.append(curve.control2.x);
+                builder.append(",");
+                builder.append(curve.control2.y);
+                builder.append(",");
+                builder.append(curve.control2.z);
+                builder.append("],[");
+                builder.append(curve.endPoint.x);
+                builder.append(",");
+                builder.append(curve.endPoint.y);
+                builder.append(",");
+                builder.append(curve.endPoint.z);
+                builder.append("]],");
+            }
+            builder.deleteCharAt(builder.length() - 1);
+            builder.append("]}");
+        } else if(mode == Message.TYPE_TEXT) {
+            builder.append(", '" + Message.ATTR_TEXT + "':\"");
+            builder.append(editText.getText().toString());
+            builder.append("\"}");
         }
-        builder.deleteCharAt(builder.length() - 1);
-        builder.append("]}");
 
         return builder.toString();
     }
 
     public void onClickPlaceBtn(View view) {
-        Log.i(TAG, "onClickPlaceBtn");
+        //TODO: créer une instance de message et la transmettre
         Intent intent = new Intent(DrawActivity.this, AugmentedViewActivity.class);
         ArrayList<BezierCurve> curves = pad.getBeziersCurves();
         intent.putExtra("curves", curves);
@@ -167,5 +189,11 @@ public class DrawActivity extends AppCompatActivity {
     public void onClickEraseEdit(View view) {
         pad.clear();
         fam.collapse();
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        switcher.showNext();
+        mode = (mode == Message.TYPE_DRAW) ? Message.TYPE_TEXT : Message.TYPE_DRAW;
     }
 }

@@ -16,6 +16,7 @@ public abstract class Message implements Parcelable {
     public static final String ATTR_ROTY = "rotY";
     public static final String ATTR_ROTZ = "rotZ";
     public static final String ATTR_POINTS = "points";
+    public static final String ATTR_TEXT = "text";
 
     private double latitude, longitude;
 

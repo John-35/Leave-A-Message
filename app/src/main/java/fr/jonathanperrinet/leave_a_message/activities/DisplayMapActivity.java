@@ -6,11 +6,13 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.koushikdutta.ion.Ion;
 
 import org.osmdroid.api.IMapController;
@@ -57,6 +59,7 @@ public class DisplayMapActivity extends LocatedActivity {
     boolean firstTime = true;
 
     private MapView mapView;
+    private FloatingActionsMenu fam;
 
     private Handler handlerUpdate;
     private Runnable runUpdateItemPresence;
@@ -151,6 +154,8 @@ public class DisplayMapActivity extends LocatedActivity {
                 handlerUpdate.postDelayed(this, REFRESH_TIME);
             }
         };
+
+        fam = (FloatingActionsMenu)findViewById(R.id.floating_menu);
     }
 
     private void displayMessage(Message msg) {
@@ -168,6 +173,7 @@ public class DisplayMapActivity extends LocatedActivity {
      */
     public void onClickFabBtn(View view) {
         if(myPosition != null) {
+            fam.collapse();
             Intent intent = new Intent(this, DrawActivity.class);
             intent.putExtra(INTENT_LOCATION_LAT, myPosition.getLatitude());
             intent.putExtra(INTENT_LOCATION_LONG, myPosition.getLongitude());
