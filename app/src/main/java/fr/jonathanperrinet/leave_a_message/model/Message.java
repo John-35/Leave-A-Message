@@ -26,11 +26,15 @@ public abstract class Message implements Parcelable {
 
     private String url;
 
-    public Message(String url, double latitude, double longitude) {
-        this.latitude = latitude;
-        this.longitude = longitude;
+    public Message(String url) {
         this.url = url;
         loaded = false;
+    }
+
+    public Message(String url, double latitude, double longitude) {
+        this(url);
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public Message(Parcel in) {
@@ -82,6 +86,8 @@ public abstract class Message implements Parcelable {
     }
 
     public abstract void setContent(Object content);
+
+    public abstract Object getContent();
 
     @Override
     public int describeContents() {

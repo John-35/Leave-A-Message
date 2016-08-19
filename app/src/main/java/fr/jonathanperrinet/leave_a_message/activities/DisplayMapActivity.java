@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -26,11 +25,11 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.SimpleLocationOverlay;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 
 import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
 import fr.jonathanperrinet.leave_a_message.model.Message;
+import fr.jonathanperrinet.leave_a_message.model.MessageString;
 import fr.jonathanperrinet.leave_a_message.utils.MessageManager;
 
 /**
@@ -161,10 +160,19 @@ public class DisplayMapActivity extends LocatedActivity {
     private void displayMessage(Message msg) {
         Log.i(TAG, "displayMessage " + msg);
         if(msg != null) {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(DisplayMapActivity.this);
-            alertDialogBuilder.setMessage(msg.toString())
-                    .setCancelable(true)
-                    .show();
+
+            if(msg instanceof MessageString) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(DisplayMapActivity.this);
+                alertDialogBuilder.setMessage(msg.toString())
+                        .setCancelable(true)
+                        .show();
+            } else {
+                ArrayList<Message> listMsg = new ArrayList<>();
+                listMsg.add(msg);
+                Intent intent = new Intent(DisplayMapActivity.this, AugmentedViewActivity.class);
+                intent.putParcelableArrayListExtra(LocatedActivity.INTENT_MESSAGES, listMsg);
+                startActivity(intent);
+            }
         }
     }
 
@@ -230,14 +238,14 @@ public class DisplayMapActivity extends LocatedActivity {
     }
 
     public void onClickAugmentedView(View view) {
-        //TODO: replier le menu de floating buttons
         Intent intent = new Intent(this, AugmentedViewActivity.class);
-        HashMap<String, Message> test = new HashMap<>();
+        /*HashMap<String, Message> test = new HashMap<>();
 
         for(String key : messages.keySet()) {
             Log.i(TAG, key + " is " + messages.get(key));
         }
-        intent.putExtra(LocatedActivity.INTENT_MESSAGES, test);
+        intent.putExtra(LocatedActivity.INTENT_MESSAGES, test);*/
+        fam.collapse();
         startActivity(intent);
     }
 

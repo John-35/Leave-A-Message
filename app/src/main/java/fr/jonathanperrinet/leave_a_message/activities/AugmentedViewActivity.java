@@ -70,13 +70,19 @@ public class AugmentedViewActivity extends LocatedActivity implements MessagesRe
         Intent intent = getIntent();
         Log.i(TAG, "Intent: " + intent);
         if(intent != null) {
-            Serializable value = intent.getSerializableExtra(INTENT_MESSAGES);
-            Log.i(TAG, "Value intent: " + value);
-            try {
+            ArrayList<Message> listMsg = intent.getParcelableArrayListExtra(INTENT_MESSAGES);
+            Log.i(TAG, "Value intent: " + listMsg);
+            if(listMsg != null) {
+                messages = new HashMap<>();
+                for (Message msg : listMsg) {
+                    messages.put(msg.getUrl(), msg);
+                }
+            }
+            /*try {
                 messages = (HashMap<String, Message>) value;
             } catch (ClassCastException cce) {
                 Log.e(TAG, cce.getMessage());
-            }
+            }*/
         }
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -152,16 +158,6 @@ public class AugmentedViewActivity extends LocatedActivity implements MessagesRe
     public HashMap<String, Message> getMessages() {
         Log.i(TAG, "getMessages: " + messages);
         return messages;
-    }
-
-    @Override
-    public List<BezierCurve> getCurves() {
-        List<BezierCurve> curves = null;
-        Intent intent = getIntent();
-        if(intent != null) {
-            curves = intent.getParcelableArrayListExtra("curves");
-        }
-        return curves;
     }
 
     public void onClickPlaceBtn(View view) {

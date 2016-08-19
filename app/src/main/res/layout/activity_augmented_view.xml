@@ -22,7 +22,9 @@
         android:layout_gravity="bottom|end"
         app:fab_addButtonColorNormal="@color/colorAccent"
         app:fab_addButtonColorPressed="@color/colorAccentDark"
-        android:elevation="6dp">
+        android:elevation="6dp"
+        app:fab_labelsPosition="left"
+        app:fab_labelStyle="@style/menu_labels_style">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"

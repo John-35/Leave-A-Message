@@ -57,12 +57,14 @@
         android:layout_gravity="bottom|end"
         app:fab_addButtonColorNormal="@color/colorAccent"
         app:fab_addButtonColorPressed="@color/colorAccentDark"
-        android:elevation="6dp">
+        android:elevation="6dp"
+        app:fab_labelsPosition="left"
+        app:fab_labelStyle="@style/menu_labels_style">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_title="@string/edit_msg"
+            app:fab_title="@string/clear_msg"
             app:fab_colorNormal="@color/colorPrimary"
             app:fab_colorPressed="@color/colorPrimaryDark"
             app:fab_icon="@android:drawable/ic_menu_delete"
@@ -71,7 +73,7 @@
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_title="@string/place_msg"
+            app:fab_title="@string/position_msg"
             app:fab_colorNormal="@color/colorPrimary"
             app:fab_colorPressed="@color/colorPrimaryDark"
             app:fab_icon="@android:drawable/ic_menu_crop"

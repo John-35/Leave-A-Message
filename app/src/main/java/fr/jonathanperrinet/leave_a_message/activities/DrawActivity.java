@@ -1,15 +1,14 @@
 package fr.jonathanperrinet.leave_a_message.activities;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
@@ -26,6 +25,8 @@ import java.util.ArrayList;
 import fr.jonathanperrinet.leave_a_message.leave_a_message.R;
 import fr.jonathanperrinet.leave_a_message.model.BezierCurve;
 import fr.jonathanperrinet.leave_a_message.model.Message;
+import fr.jonathanperrinet.leave_a_message.model.MessageDrawn;
+import fr.jonathanperrinet.leave_a_message.model.MessageString;
 import fr.jonathanperrinet.leave_a_message.utils.App_Const;
 
 /**
@@ -37,7 +38,6 @@ public class DrawActivity extends AppCompatActivity implements CompoundButton.On
 
     private static final String TAG = "DrawActivity";
 
-    //TODO: mettre à jour la position en permanence. Mise en place d'un service ?
     private double latitude;
     private double longitude;
 
@@ -103,6 +103,7 @@ public class DrawActivity extends AppCompatActivity implements CompoundButton.On
     }
 
     private void sendMessage(float rotX, float rotY, float rotZ) {
+        //TODO: ajouter l'ajout d'un contact/mail lors de l'upload d'un message
         AsyncHttpPost post = new AsyncHttpPost(App_Const.URL_UPLOAD);
         MultipartFormDataBody body = new MultipartFormDataBody();
 
@@ -118,10 +119,21 @@ public class DrawActivity extends AppCompatActivity implements CompoundButton.On
             public void onConnectCompleted(Exception ex, AsyncHttpResponse res) {
                 Log.i(TAG, "Uploaded: " + res);
                 Toast.makeText(DrawActivity.this, "Resultat: " + res.message(), Toast.LENGTH_SHORT).show();
+                //TODO: Demander avant d'envoyer le sms
+                sendSms(latitude, longitude);
             }
         });
 
         Toast.makeText(this, "Message envoyé", Toast.LENGTH_SHORT).show();
+    }
+
+    private void sendSms(double latitude, double longitude) {
+        //TODO: send sms to someone
+        String content = "Un message vous attend ici : " + Uri.parse("http://maps.google.com/?q=<" + latitude + ">,<" + longitude + ">");
+        Intent sendIntent = new Intent(Intent.ACTION_VIEW);
+        sendIntent.putExtra("sms_body", content);
+        sendIntent.setType("vnd.android-dir/mms-sms");
+        startActivity(sendIntent);
     }
 
     private String formatMessage(float rotX, float rotY, float rotZ) {
@@ -180,8 +192,22 @@ public class DrawActivity extends AppCompatActivity implements CompoundButton.On
     public void onClickPlaceBtn(View view) {
         //TODO: créer une instance de message et la transmettre
         Intent intent = new Intent(DrawActivity.this, AugmentedViewActivity.class);
-        ArrayList<BezierCurve> curves = pad.getBeziersCurves();
-        intent.putExtra("curves", curves);
+        //ArrayList<BezierCurve> curves = pad.getBeziersCurves();
+        //intent.putExtra("curves", curves);
+        Message msg = null;
+        if(mode == Message.TYPE_DRAW) {
+            msg = new MessageDrawn("new");
+            msg.setContent(pad.getBeziersCurves());
+            msg.setLoaded(true);
+        } else if(mode == Message.TYPE_TEXT) {
+            msg = new MessageString("new");
+            msg.setLoaded(true);
+            if(editText != null)
+                msg.setContent(editText.getText().toString());
+        }
+        ArrayList<Message> listMsg = new ArrayList<>();
+        listMsg.add(msg);
+        intent.putParcelableArrayListExtra(LocatedActivity.INTENT_MESSAGES, listMsg);
         fam.collapse();
         startActivityForResult(intent, REQUEST_CODE);
     }

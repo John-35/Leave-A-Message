@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.SEND_SMS"/>
 
     <uses-permission-sdk-23 android:name="android.permission.CAMERA" />
 
@@ -41,10 +42,6 @@
             android:name="fr.jonathanperrinet.leave_a_message.activities.DrawActivity"
             android:screenOrientation="portrait" />
 
-        <service
-            android:name="fr.jonathanperrinet.leave_a_message.services.PositionService"
-            android:enabled="true"
-            android:exported="false"/>
     </application>
 
 </manifest>

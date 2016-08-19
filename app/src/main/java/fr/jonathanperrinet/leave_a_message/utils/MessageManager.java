@@ -35,7 +35,6 @@ public class MessageManager {
     }
 
     public static void downloadMessages(final Context context, GeoPoint location) throws ClassCastException {
-        //TODO: check interface
         if(!(context instanceof OnMessageListener)) {
             throw new ClassCastException(context.toString() + " must implements MessageManager.OnMessageListener");
         }
@@ -78,7 +77,7 @@ public class MessageManager {
                 .setCallback(new FutureCallback<String>() {
                     @Override
                     public void onCompleted(Exception e, String json) {
-                        //TODO: récupérer les données du message
+                        //TODO: mettre les méthodes de construction à partir de json dans les modèles
                         if(json != null) {
                             try {
                                 JSONObject jsonObj = new JSONObject(json);

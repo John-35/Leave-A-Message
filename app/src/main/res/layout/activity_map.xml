@@ -18,14 +18,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
+        android:elevation="6dp"
         app:fab_addButtonColorNormal="@color/colorAccent"
         app:fab_addButtonColorPressed="@color/colorAccentDark"
-        android:elevation="6dp">
+        app:fab_labelsPosition="left"
+        app:fab_labelStyle="@style/menu_labels_style">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_title="@string/edit_msg"
+            app:fab_title="@string/laisser_msg"
             app:fab_colorNormal="@color/colorPrimary"
             app:fab_colorPressed="@color/colorPrimaryDark"
             app:fab_icon="@android:drawable/ic_dialog_email"
@@ -34,7 +36,7 @@
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_title="Vue augmentée"
+            app:fab_title="@string/launch_3d"
             app:fab_colorNormal="@color/colorPrimary"
             app:fab_colorPressed="@color/colorPrimaryDark"
             app:fab_icon="@android:drawable/ic_menu_camera"

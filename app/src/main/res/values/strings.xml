@@ -7,6 +7,10 @@
     <string name="votre_message">Votre Message :</string>
     <string name="erreur_loading_message">Impossible de charger le message.</string>
     <string name="placer">Placer</string>
-    <string name="edit_msg">Edit</string>
+    <string name="edit_msg">Modifier le message</string>
     <string name="place_msg">Placer</string>
+    <string name="position_msg">Positionner le message</string>
+    <string name="clear_msg">Effacer</string>
+    <string name="launch_3d">Passer en vue 3D</string>
+    <string name="laisser_msg">Laisser un message</string>
 </resources>

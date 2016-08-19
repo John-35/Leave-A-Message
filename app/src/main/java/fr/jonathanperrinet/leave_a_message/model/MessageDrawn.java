@@ -13,6 +13,8 @@ public class MessageDrawn extends Message {
 
     public List<BezierCurve> curves;
 
+    public MessageDrawn(String url) { super(url); }
+
     public MessageDrawn(String url, double latitude, double longitude) {
         super(url, latitude, longitude);
         curves = new ArrayList<>();
@@ -20,6 +22,7 @@ public class MessageDrawn extends Message {
 
     public MessageDrawn(Parcel in) {
         super(in);
+        curves = new ArrayList<>();
         in.readList(curves, BezierCurve.class.getClassLoader());
     }
 
@@ -44,6 +47,11 @@ public class MessageDrawn extends Message {
         if(content instanceof List) {
             curves = (List<BezierCurve>)content;
         }
+    }
+
+    @Override
+    public Object getContent() {
+        return curves;
     }
 
     public void setCurves(List<BezierCurve> curves) {
